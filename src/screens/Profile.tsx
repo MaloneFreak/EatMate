@@ -4,9 +4,12 @@ import { useNavigate } from 'react-router';
 import { ClassifySheet } from '../components/ClassifySheet';
 import { useConfirm } from '../components/Confirm';
 import { GradeBadge } from '../components/GradeBadge';
+import { LanguagePicker } from '../components/LanguagePicker';
 import { PageHeader } from '../components/PageHeader';
+import { Rich } from '../components/Rich';
 import { useToast } from '../components/Toast';
 import {
+  BackupError,
   backupFileName,
   exportBackup,
   importBackup,
@@ -15,26 +18,24 @@ import {
 } from '../data/backup';
 import { useData } from '../data/DataProvider';
 import { classifyFood, clearAllData, deleteCustomFood, saveProfileName } from '../data/repo';
-import { formatDateTime } from '../domain/dates';
 import { GRADE_THRESHOLDS } from '../domain/grades';
-import { groupLabel, type ClassifyOption } from '../domain/groups';
+import type { ClassifyOption } from '../domain/groups';
 import { SCORE_WEIGHTS } from '../domain/scoring';
-import type { CustomFood } from '../domain/types';
+import type { CustomFood, ScoreComponentKey } from '../domain/types';
+import { useI18n } from '../i18n/I18nProvider';
 import { isIOS, isStandalone, useInstallPrompt } from '../lib/install';
 import { downloadText } from '../lib/share';
 import { getThemePreference, setThemePreference, type ThemePreference } from '../lib/theme';
 
-const THEMES: { value: ThemePreference; label: string }[] = [
-  { value: 'system', label: 'Automático' },
-  { value: 'light', label: 'Claro' },
-  { value: 'dark', label: 'Escuro' },
-];
+const THEMES: ThemePreference[] = ['system', 'light', 'dark'];
 
 export function ProfileScreen() {
   const { profile, settings, meals, reports, customFoods, dates } = useData();
   const toast = useToast();
   const confirm = useConfirm();
   const navigate = useNavigate();
+  const { t, f } = useI18n();
+  const p = t.profile;
   const [name, setName] = useState(profile?.name ?? '');
   const [theme, setTheme] = useState<ThemePreference>(getThemePreference);
   const [reclassify, setReclassify] = useState<CustomFood | null>(null);
@@ -45,7 +46,7 @@ export function ProfileScreen() {
     event.preventDefault();
     if (!name.trim()) return;
     await saveProfileName(name);
-    toast('Nome atualizado.');
+    toast(p.nameSaved);
   };
 
   const chooseTheme = (value: ThemePreference) => {
@@ -57,7 +58,7 @@ export function ProfileScreen() {
     const backup = await exportBackup();
     downloadText(backupFileName(), JSON.stringify(backup, null, 2), 'application/json');
     await markBackupDone();
-    toast('Backup salvo nos seus arquivos.');
+    toast(p.exported);
   };
 
   const doImport = async (event: ChangeEvent<HTMLInputElement>) => {
@@ -67,46 +68,42 @@ export function ProfileScreen() {
     try {
       const backup = parseBackup(await file.text());
       const ok = await confirm({
-        title: 'Importar backup?',
-        message: `O arquivo tem ${backup.meals.length} refeições e ${backup.reports.length} relatórios. Eles serão juntados aos seus dados atuais — nada será apagado.`,
-        confirmLabel: 'Importar',
+        title: p.importTitle,
+        message: p.importMessage(backup.meals.length, backup.reports.length),
+        confirmLabel: p.importConfirm,
       });
       if (!ok) return;
       const summary = await importBackup(backup);
-      toast(`Backup importado: ${summary.meals} refeições.`);
+      toast(p.imported(summary.meals));
     } catch (error) {
-      toast(
-        error instanceof Error ? error.message : 'Não foi possível importar o arquivo.',
-        'error',
-      );
+      toast(error instanceof BackupError ? t.backup[error.code] : t.backup.importError, 'error');
     }
   };
 
   const removeFood = async (food: CustomFood) => {
     const ok = await confirm({
-      title: `Remover “${food.name}”?`,
-      message: 'Os registros com este alimento continuam salvos, mas ficam sem classificação.',
-      confirmLabel: 'Remover',
+      title: p.removeFoodTitle(food.name),
+      message: p.removeFoodMessage,
+      confirmLabel: t.common.remove,
       danger: true,
     });
     if (!ok) return;
     await deleteCustomFood(food.id);
-    toast('Alimento removido.');
+    toast(p.foodRemoved);
   };
 
   const onReclassify = async (option: ClassifyOption) => {
     if (!reclassify) return;
     await classifyFood(reclassify.name, option);
     setReclassify(null);
-    toast('Classificação atualizada.');
+    toast(p.reclassified);
   };
 
   const eraseAll = async () => {
     const ok = await confirm({
-      title: 'Apagar todos os dados?',
-      message:
-        'Todas as refeições, relatórios e configurações deste aparelho serão apagados. Se quiser guardar uma cópia, exporte um backup antes.',
-      confirmLabel: 'Apagar tudo',
+      title: p.eraseTitle,
+      message: p.eraseMessage,
+      confirmLabel: p.eraseConfirm,
       danger: true,
     });
     if (!ok) return;
@@ -118,11 +115,11 @@ export function ProfileScreen() {
 
   return (
     <div className="stack">
-      <PageHeader title="Perfil" />
+      <PageHeader title={p.title} />
 
       <form className="card stack-sm" onSubmit={saveName}>
         <label className="field">
-          <span className="field-label">Seu nome</span>
+          <span className="field-label">{p.name}</span>
           <input
             className="input"
             value={name}
@@ -136,23 +133,29 @@ export function ProfileScreen() {
           className="btn btn-secondary"
           disabled={!name.trim() || name.trim() === profile?.name}
         >
-          Salvar nome
+          {p.saveName}
         </button>
       </form>
 
+      <section className="card stack-sm" aria-labelledby="language-title">
+        <h2 id="language-title">{p.language}</h2>
+        <LanguagePicker />
+        <p className="muted small">{p.languageHint}</p>
+      </section>
+
       <section className="card stack-sm" aria-labelledby="theme-title">
-        <h2 id="theme-title">Aparência</h2>
+        <h2 id="theme-title">{p.appearance}</h2>
         <div className="chips" role="radiogroup" aria-labelledby="theme-title">
-          {THEMES.map((t) => (
+          {THEMES.map((value) => (
             <button
-              key={t.value}
+              key={value}
               type="button"
               role="radio"
-              aria-checked={theme === t.value}
-              className={`chip${theme === t.value ? ' selected' : ''}`}
-              onClick={() => chooseTheme(t.value)}
+              aria-checked={theme === value}
+              className={`chip${theme === value ? ' selected' : ''}`}
+              onClick={() => chooseTheme(value)}
             >
-              {t.label}
+              {p.themes[value]}
             </button>
           ))}
         </div>
@@ -160,55 +163,40 @@ export function ProfileScreen() {
 
       <section className="card stack-sm" aria-labelledby="install-title">
         <h2 id="install-title" className="row">
-          <Smartphone size={20} aria-hidden="true" /> Instalar o app
+          <Smartphone size={20} aria-hidden="true" /> {p.install}
         </h2>
         {installed ? (
-          <p className="muted">Você já está usando o EatMate instalado. 🎉</p>
+          <p className="muted">{p.installed}</p>
         ) : canInstall ? (
           <>
-            <p className="muted">
-              Instale o EatMate para abrir direto da tela inicial, como um aplicativo, mesmo sem
-              internet.
-            </p>
+            <p className="muted">{p.installText}</p>
             <button type="button" className="btn btn-primary" onClick={() => void install()}>
-              Instalar EatMate
+              {p.installButton}
             </button>
           </>
-        ) : isIOS() ? (
-          <p className="muted">
-            No iPhone, abra no Safari, toque em <strong>Compartilhar</strong> e depois em{' '}
-            <strong>Adicionar à Tela de Início</strong>.
-          </p>
         ) : (
           <p className="muted">
-            No menu do navegador, procure <strong>Instalar app</strong> ou{' '}
-            <strong>Adicionar à tela inicial</strong>.
+            <Rich text={isIOS() ? p.installIOS : p.installOther} />
           </p>
         )}
       </section>
 
       <section className="card stack-sm" aria-labelledby="data-title">
-        <h2 id="data-title">Seus dados</h2>
-        <p className="muted small">
-          {meals.length} refeições em {dates.length} dias · {reports.length} relatórios. Tudo fica
-          salvo apenas neste aparelho — faça um backup de vez em quando para não perder nada se
-          trocar de celular.
-        </p>
+        <h2 id="data-title">{p.data}</h2>
+        <p className="muted small">{p.dataSummary(meals.length, dates.length, reports.length)}</p>
         <p className="small">
-          Último backup:{' '}
-          <strong>
-            {settings?.lastBackupAt ? formatDateTime(settings.lastBackupAt) : 'nunca'}
-          </strong>
+          {p.lastBackup}{' '}
+          <strong>{settings?.lastBackupAt ? f.dateTime(settings.lastBackupAt) : p.never}</strong>
         </p>
         <button type="button" className="btn btn-secondary btn-block" onClick={doExport}>
-          <Download size={18} aria-hidden="true" /> Exportar backup
+          <Download size={18} aria-hidden="true" /> {p.export}
         </button>
         <button
           type="button"
           className="btn btn-secondary btn-block"
           onClick={() => fileRef.current?.click()}
         >
-          <Upload size={18} aria-hidden="true" /> Importar backup
+          <Upload size={18} aria-hidden="true" /> {p.import}
         </button>
         <input
           ref={fileRef}
@@ -216,30 +204,28 @@ export function ProfileScreen() {
           accept="application/json,.json"
           className="visually-hidden"
           onChange={doImport}
-          aria-label="Arquivo de backup"
+          aria-label={t.common.backupFile}
           tabIndex={-1}
         />
       </section>
 
       {customFoods.length > 0 && (
         <section className="card stack-sm" aria-labelledby="custom-title">
-          <h2 id="custom-title">Meus alimentos</h2>
-          <p className="muted small">
-            Alimentos que você classificou. Toque no lápis para mudar a categoria.
-          </p>
+          <h2 id="custom-title">{p.customFoods}</h2>
+          <p className="muted small">{p.customFoodsText}</p>
           <ul className="item-list">
             {customFoods.map((food) => (
               <li key={food.id} className="item-row">
                 <GradeBadge grade={food.grade} />
                 <span className="item-row-main">
                   <span className="item-name">{food.name}</span>
-                  <span className="item-meta">{groupLabel(food.group)}</span>
+                  <span className="item-meta">{t.groups[food.group]}</span>
                 </span>
                 <button
                   type="button"
                   className="icon-btn small"
                   onClick={() => setReclassify(food)}
-                  aria-label={`Mudar categoria de ${food.name}`}
+                  aria-label={p.changeCategory(food.name)}
                 >
                   <Pencil size={17} aria-hidden="true" />
                 </button>
@@ -247,7 +233,7 @@ export function ProfileScreen() {
                   type="button"
                   className="icon-btn small danger"
                   onClick={() => removeFood(food)}
-                  aria-label={`Remover ${food.name}`}
+                  aria-label={p.removeFood(food.name)}
                 >
                   <Trash2 size={17} aria-hidden="true" />
                 </button>
@@ -258,54 +244,40 @@ export function ProfileScreen() {
       )}
 
       <details className="card disclosure">
-        <summary>Como a nota é calculada?</summary>
+        <summary>{p.method.title}</summary>
         <div className="prose small methodology">
           <p>
-            Cada alimento tem uma nota de <strong>A</strong> (melhor) a <strong>E</strong>,
-            inspirada no Nutri-Score europeu, e um grau de processamento segundo o{' '}
-            <strong>Guia Alimentar para a População Brasileira</strong> (in natura, ingredientes
-            culinários, processados e ultraprocessados).
+            <Rich text={p.method.intro} />
           </p>
-          <p>A nota da semana vai de 0 a 100 e combina cinco critérios:</p>
+          <p>{p.method.criteria}</p>
           <ul>
-            <li>Qualidade nutricional dos alimentos — {SCORE_WEIGHTS.qualidade * 100}%</li>
-            <li>Grau de processamento — {SCORE_WEIGHTS.processamento * 100}%</li>
-            <li>
-              Frutas, verduras e legumes (meta: 5 porções por dia) —{' '}
-              {SCORE_WEIGHTS.frutas_verduras * 100}%
-            </li>
-            <li>Variedade de alimentos — {SCORE_WEIGHTS.variedade * 100}%</li>
-            <li>
-              Regularidade do café da manhã, almoço e jantar — {SCORE_WEIGHTS.regularidade * 100}%
-            </li>
+            {(Object.keys(SCORE_WEIGHTS) as ScoreComponentKey[]).map((key) => (
+              <li key={key}>
+                {p.method.items[key]} — {SCORE_WEIGHTS[key] * 100}%
+              </li>
+            ))}
           </ul>
           <p>
-            Depois, os pontos viram letra:{' '}
-            {GRADE_THRESHOLDS.slice(0, 4)
-              .map((t) => `${t.grade} a partir de ${t.min}`)
-              .join(', ')}{' '}
-            e E abaixo de {GRADE_THRESHOLDS[3]!.min}.
+            {p.method.letters(
+              GRADE_THRESHOLDS.slice(0, 4)
+                .map((th) => p.method.threshold(th.grade, th.min))
+                .join(', '),
+              GRADE_THRESHOLDS[3]!.min,
+            )}
           </p>
-          <p>
-            As notas são estimativas para ajudar você a perceber padrões — não substituem a
-            orientação de um(a) nutricionista.
-          </p>
+          <p>{p.method.disclaimer}</p>
         </div>
       </details>
 
       <section className="card stack-sm danger-zone" aria-labelledby="danger-title">
-        <h2 id="danger-title">Apagar dados</h2>
-        <p className="muted small">
-          Remove todas as refeições, relatórios e configurações deste aparelho.
-        </p>
+        <h2 id="danger-title">{p.danger}</h2>
+        <p className="muted small">{p.dangerText}</p>
         <button type="button" className="btn btn-danger" onClick={eraseAll}>
-          <Trash2 size={18} aria-hidden="true" /> Apagar todos os dados
+          <Trash2 size={18} aria-hidden="true" /> {p.eraseAll}
         </button>
       </section>
 
-      <p className="app-version muted small">
-        EatMate {__APP_VERSION__} · seus dados ficam só com você.
-      </p>
+      <p className="app-version muted small">{p.version(__APP_VERSION__)}</p>
 
       <ClassifySheet
         name={reclassify?.name ?? null}

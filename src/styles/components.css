@@ -1177,3 +1177,35 @@ details.disclosure[open] > summary::after {
 .prose li + li {
   margin-top: 4px;
 }
+
+/* Idioma */
+.language-picker {
+  position: relative;
+  display: flex;
+  align-items: center;
+}
+
+.language-picker svg {
+  position: absolute;
+  left: 14px;
+  color: var(--text-muted);
+  pointer-events: none;
+}
+
+.language-picker select {
+  padding-left: 42px;
+  appearance: auto;
+  cursor: pointer;
+}
+
+.language-picker.compact {
+  align-self: center;
+}
+
+.language-picker.compact select {
+  width: auto;
+  min-height: 40px;
+  padding-block: 6px;
+  border-radius: 999px;
+  font-size: 0.95rem;
+}

@@ -1,5 +1,6 @@
 import { ArrowLeft } from 'lucide-react';
 import type { ReactNode } from 'react';
+import { useI18n } from '../i18n/I18nProvider';
 import { useGoBack } from '../lib/navigation';
 
 interface PageHeaderProps {
@@ -11,11 +12,12 @@ interface PageHeaderProps {
 }
 
 export function PageHeader({ title, subtitle, back, actions }: PageHeaderProps) {
+  const { t } = useI18n();
   const goBack = useGoBack(back ?? '/');
   return (
     <header className="page-header">
       {back !== undefined && (
-        <button type="button" className="icon-btn" onClick={goBack} aria-label="Voltar">
+        <button type="button" className="icon-btn" onClick={goBack} aria-label={t.common.back}>
           <ArrowLeft size={22} aria-hidden="true" />
         </button>
       )}

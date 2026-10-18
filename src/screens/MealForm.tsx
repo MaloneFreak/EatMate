@@ -12,13 +12,14 @@ import { useToast } from '../components/Toast';
 import { useData } from '../data/DataProvider';
 import { uid } from '../data/db';
 import { classifyFood, deleteMeal, saveMeal } from '../data/repo';
-import { addDays, formatFull, isValidISODate, nowTime, todayISO } from '../domain/dates';
+import { addDays, isValidISODate, nowTime, todayISO } from '../domain/dates';
 import { GRADE_POINTS } from '../domain/grades';
-import { groupLabel, groupWeight, type ClassifyOption } from '../domain/groups';
-import { MEAL_TYPES, isMealType, mealLabel, suggestMealType } from '../domain/meals';
+import { groupWeight, type ClassifyOption } from '../domain/groups';
+import { MEAL_TYPES, isMealType, suggestMealType } from '../domain/meals';
 import type { ParsedItem } from '../domain/parser';
 import { averageGradeLetter } from '../domain/scoring';
 import type { Meal, MealType } from '../domain/types';
+import { useI18n } from '../i18n/I18nProvider';
 import { useGoBack } from '../lib/navigation';
 
 interface DraftItem {
@@ -42,6 +43,7 @@ export function MealFormScreen() {
   const { id } = useParams();
   const [params] = useSearchParams();
   const { meals, loading } = useData();
+  const { t } = useI18n();
 
   if (id) {
     const meal = meals.find((m) => m.id === id);
@@ -49,9 +51,9 @@ export function MealFormScreen() {
       if (loading) return null;
       return (
         <>
-          <PageHeader title="Editar refeição" back="/historico" />
-          <EmptyState icon={<Info size={30} />} title="Refeição não encontrada">
-            Ela pode ter sido excluída.
+          <PageHeader title={t.mealForm.editTitle} back="/historico" />
+          <EmptyState icon={<Info size={30} />} title={t.mealForm.notFound}>
+            {t.mealForm.notFoundText}
           </EmptyState>
         </>
       );
@@ -96,6 +98,8 @@ function MealForm({ initial, editing }: { initial: Draft; editing: boolean }) {
   const { meals, index, usage } = useData();
   const toast = useToast();
   const confirm = useConfirm();
+  const { t, f } = useI18n();
+  const m = t.mealForm;
   const goBack = useGoBack('/');
   const [draft, setDraft] = useState<Draft>(initial);
   const [classifying, setClassifying] = useState<string | null>(null);
@@ -178,7 +182,7 @@ function MealForm({ initial, editing }: { initial: Draft; editing: boolean }) {
       ),
     }));
     setClassifying(null);
-    toast(`“${name}” classificado como ${option.label.toLowerCase()}.`);
+    toast(t.classify.done(name, t.classify.options[option.key].label.toLowerCase()));
   };
 
   const save = async () => {
@@ -198,11 +202,11 @@ function MealForm({ initial, editing }: { initial: Draft; editing: boolean }) {
           foodId: i.foodId,
         })),
       });
-      toast(editing ? 'Alterações salvas!' : `${mealLabel(draft.type)} registrado!`);
+      toast(editing ? m.changesSaved : m.saved(t.mealTypes[draft.type]));
       goBack();
     } catch (error) {
       console.error(error);
-      toast('Não foi possível salvar. Tente novamente.', 'error');
+      toast(m.saveError, 'error');
       setSaving(false);
     }
   };
@@ -210,21 +214,21 @@ function MealForm({ initial, editing }: { initial: Draft; editing: boolean }) {
   const remove = async () => {
     if (!draft.id) return;
     const ok = await confirm({
-      title: 'Excluir esta refeição?',
-      message: `${mealLabel(draft.type)} de ${formatFull(draft.date)}. Essa ação não pode ser desfeita.`,
-      confirmLabel: 'Excluir',
+      title: m.deleteTitle,
+      message: m.deleteMessage(t.mealTypes[draft.type], f.full(draft.date)),
+      confirmLabel: t.common.delete,
       danger: true,
     });
     if (!ok) return;
     await deleteMeal(draft.id);
-    toast('Refeição excluída.');
+    toast(m.deleted);
     goBack();
   };
 
   return (
     <div className="stack meal-form">
       <PageHeader
-        title={editing ? 'Editar refeição' : 'Registrar refeição'}
+        title={editing ? m.editTitle : m.newTitle}
         back="/"
         actions={
           editing && (
@@ -232,7 +236,7 @@ function MealForm({ initial, editing }: { initial: Draft; editing: boolean }) {
               type="button"
               className="icon-btn danger"
               onClick={remove}
-              aria-label="Excluir refeição"
+              aria-label={m.deleteLabel}
             >
               <Trash2 size={21} aria-hidden="true" />
             </button>
@@ -242,7 +246,7 @@ function MealForm({ initial, editing }: { initial: Draft; editing: boolean }) {
 
       <section className="card stack-sm" aria-labelledby="when-title">
         <h2 id="when-title" className="field-label">
-          Quando?
+          {m.when}
         </h2>
         <div className="chips">
           <button
@@ -251,7 +255,7 @@ function MealForm({ initial, editing }: { initial: Draft; editing: boolean }) {
             aria-pressed={draft.date === today}
             onClick={() => update({ date: today })}
           >
-            Hoje
+            {t.common.today}
           </button>
           <button
             type="button"
@@ -259,12 +263,12 @@ function MealForm({ initial, editing }: { initial: Draft; editing: boolean }) {
             aria-pressed={draft.date === addDays(today, -1)}
             onClick={() => update({ date: addDays(today, -1) })}
           >
-            Ontem
+            {t.common.yesterday}
           </button>
         </div>
         <div className="when-row">
           <label className="field grow">
-            <span className="visually-hidden">Data</span>
+            <span className="visually-hidden">{m.date}</span>
             <input
               className="input"
               type="date"
@@ -275,7 +279,7 @@ function MealForm({ initial, editing }: { initial: Draft; editing: boolean }) {
             />
           </label>
           <label className="field when-time">
-            <span className="visually-hidden">Horário (opcional)</span>
+            <span className="visually-hidden">{m.time}</span>
             <input
               className="input"
               type="time"
@@ -284,15 +288,15 @@ function MealForm({ initial, editing }: { initial: Draft; editing: boolean }) {
             />
           </label>
         </div>
-        {futureDate && <p className="field-hint">Não dá para registrar refeições no futuro.</p>}
+        {futureDate && <p className="field-hint">{m.future}</p>}
       </section>
 
       <section className="card stack-sm" aria-labelledby="type-title">
         <h2 id="type-title" className="field-label">
-          Qual refeição?
+          {m.which}
         </h2>
         <div className="meal-type-grid">
-          {MEAL_TYPES.map(({ type, label }) => (
+          {MEAL_TYPES.map(({ type }) => (
             <button
               key={type}
               type="button"
@@ -301,7 +305,7 @@ function MealForm({ initial, editing }: { initial: Draft; editing: boolean }) {
               onClick={() => update({ type })}
             >
               <MealIcon type={type} size={22} />
-              {label}
+              {t.mealTypes[type]}
             </button>
           ))}
         </div>
@@ -309,11 +313,11 @@ function MealForm({ initial, editing }: { initial: Draft; editing: boolean }) {
           <div className="notice notice-info">
             <Info size={18} aria-hidden="true" />
             <span>
-              Você já registrou {mealLabel(draft.type).toLowerCase()} neste dia.{' '}
+              {m.alreadyBefore(t.mealTypes[draft.type])}{' '}
               <Link to={`/registrar/${sameTypeMeal.id}`} replace>
-                Editar o registro existente
+                {m.editExisting}
               </Link>{' '}
-              ou salve este como um registro separado.
+              {m.alreadyAfter}
             </span>
           </div>
         )}
@@ -322,16 +326,14 @@ function MealForm({ initial, editing }: { initial: Draft; editing: boolean }) {
       <section className="card stack" aria-labelledby="food-title">
         <div className="stack-sm">
           <h2 id="food-title" className="field-label">
-            O que você comeu?
+            {m.what}
           </h2>
           <FoodInput index={index} usage={usage} onAdd={addItems} />
-          <p className="field-hint">
-            Escreva um alimento por vez ou a frase inteira — o EatMate separa os itens.
-          </p>
+          <p className="field-hint">{m.hint}</p>
         </div>
 
         {draft.items.length > 0 ? (
-          <ul className="item-list" aria-label="Itens da refeição">
+          <ul className="item-list" aria-label={m.items}>
             {draft.items.map((item) => {
               const food = index.get(item.foodId);
               return (
@@ -344,7 +346,7 @@ function MealForm({ initial, editing }: { initial: Draft; editing: boolean }) {
                         {food.name.toLowerCase() !== item.name.toLowerCase()
                           ? `${food.name} · `
                           : ''}
-                        {groupLabel(food.group)}
+                        {t.groups[food.group]}
                       </span>
                     ) : (
                       <button
@@ -352,13 +354,13 @@ function MealForm({ initial, editing }: { initial: Draft; editing: boolean }) {
                         className="classify-btn"
                         onClick={() => setClassifying(item.name)}
                       >
-                        Não reconhecido · classificar
+                        {m.notRecognized}
                       </button>
                     )}
                     <input
                       className="input input-sm item-quantity"
-                      placeholder="+ quantidade (ex.: 2 fatias)"
-                      aria-label={`Quantidade de ${item.name}`}
+                      placeholder={m.quantityPlaceholder}
+                      aria-label={m.quantityOf(item.name)}
                       value={item.quantity}
                       maxLength={40}
                       onChange={(e) => updateItem(item.key, { quantity: e.target.value })}
@@ -368,7 +370,7 @@ function MealForm({ initial, editing }: { initial: Draft; editing: boolean }) {
                     type="button"
                     className="icon-btn small"
                     onClick={() => removeItem(item.key)}
-                    aria-label={`Remover ${item.name}`}
+                    aria-label={m.removeItem(item.name)}
                   >
                     <X size={18} aria-hidden="true" />
                   </button>
@@ -377,18 +379,18 @@ function MealForm({ initial, editing }: { initial: Draft; editing: boolean }) {
             })}
           </ul>
         ) : (
-          <p className="muted small">Nenhum alimento adicionado ainda.</p>
+          <p className="muted small">{m.empty}</p>
         )}
 
         {quality && (
           <p className="meal-quality">
-            <GradeBadge grade={quality} /> Qualidade média desta refeição
+            <GradeBadge grade={quality} /> {m.quality}
           </p>
         )}
 
         {frequent.length > 0 && (
           <div className="stack-sm">
-            <span className="small muted">Você costuma comer:</span>
+            <span className="small muted">{m.frequent}</span>
             <div className="chips">
               {frequent.map((f) => (
                 <button
@@ -407,10 +409,10 @@ function MealForm({ initial, editing }: { initial: Draft; editing: boolean }) {
 
       <section className="card">
         <label className="field">
-          <span className="field-label">Observações (opcional)</span>
+          <span className="field-label">{m.notes}</span>
           <textarea
             className="textarea"
-            placeholder="Ex.: comi fora, estava com muita fome…"
+            placeholder={m.notesPlaceholder}
             value={draft.notes}
             maxLength={500}
             onChange={(e) => update({ notes: e.target.value })}
@@ -425,7 +427,7 @@ function MealForm({ initial, editing }: { initial: Draft; editing: boolean }) {
           onClick={save}
           disabled={!draft.items.length || futureDate || saving}
         >
-          {editing ? 'Salvar alterações' : 'Salvar refeição'}
+          {editing ? m.saveChanges : m.save}
         </button>
       </div>
 

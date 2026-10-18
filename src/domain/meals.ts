@@ -2,7 +2,6 @@ import type { Meal, MealType } from './types';
 
 export interface MealTypeInfo {
   type: MealType;
-  label: string;
   /** Refeições principais contam para a regularidade (café da manhã, almoço e jantar). */
   main: boolean;
   /** Faixa de horário típica (início, em minutos desde a meia-noite) usada para sugerir a refeição. */
@@ -10,21 +9,17 @@ export interface MealTypeInfo {
 }
 
 export const MEAL_TYPES: MealTypeInfo[] = [
-  { type: 'cafe_manha', label: 'Café da manhã', main: true, startsAt: 4 * 60 },
-  { type: 'lanche_manha', label: 'Lanche da manhã', main: false, startsAt: 9 * 60 + 30 },
-  { type: 'almoco', label: 'Almoço', main: true, startsAt: 11 * 60 },
-  { type: 'cafe_tarde', label: 'Café da tarde', main: false, startsAt: 15 * 60 },
-  { type: 'jantar', label: 'Jantar', main: true, startsAt: 18 * 60 + 30 },
-  { type: 'ceia', label: 'Ceia', main: false, startsAt: 21 * 60 + 30 },
+  { type: 'cafe_manha', main: true, startsAt: 4 * 60 },
+  { type: 'lanche_manha', main: false, startsAt: 9 * 60 + 30 },
+  { type: 'almoco', main: true, startsAt: 11 * 60 },
+  { type: 'cafe_tarde', main: false, startsAt: 15 * 60 },
+  { type: 'jantar', main: true, startsAt: 18 * 60 + 30 },
+  { type: 'ceia', main: false, startsAt: 21 * 60 + 30 },
 ];
 
 export const MAIN_MEALS: MealType[] = MEAL_TYPES.filter((m) => m.main).map((m) => m.type);
 
 const byType = new Map(MEAL_TYPES.map((m) => [m.type, m]));
-
-export function mealLabel(type: MealType): string {
-  return byType.get(type)?.label ?? type;
-}
 
 export function mealOrder(type: MealType): number {
   return MEAL_TYPES.findIndex((m) => m.type === type);

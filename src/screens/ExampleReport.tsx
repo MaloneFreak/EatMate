@@ -9,38 +9,38 @@ import { buildDemoMeals } from '../domain/demo';
 import { getDefaultFoodIndex } from '../domain/foodIndex';
 import { periodEndingOn } from '../domain/periods';
 import { buildReport } from '../domain/report';
+import { useI18n } from '../i18n/I18nProvider';
 
 /** Relatório com uma semana fictícia, para a pessoa ver o que vai receber. */
 export function ExampleReportScreen() {
   const { profile } = useData();
+  const { t, language } = useI18n();
+  const e = t.exampleReport;
   const report = useMemo(() => {
     const end = addDays(todayISO(), -1);
-    const index = getDefaultFoodIndex();
+    const index = getDefaultFoodIndex(language);
     return buildReport({
       meals: buildDemoMeals(end, index),
       index,
       period: periodEndingOn(end),
       profileName: profile?.name ?? '',
     });
-  }, [profile]);
+  }, [profile, language]);
 
   return (
     <div className="stack">
-      <PageHeader title="Relatório de exemplo" back="/" />
+      <PageHeader title={e.header} back="/" />
       <ReportView
         data={report}
-        title="Exemplo"
-        badge={<span className="badge badge-warning">Dados fictícios</span>}
+        title={e.title}
+        badge={<span className="badge badge-warning">{e.badge}</span>}
       >
         <div className="notice notice-warning">
           <Info size={18} aria-hidden="true" />
-          <span>
-            Este é um exemplo com uma semana inventada. Seu relatório de verdade aparece depois de 7
-            dias de registros.
-          </span>
+          <span>{e.notice}</span>
         </div>
         <Link to="/registrar" className="btn btn-primary btn-block">
-          Registrar uma refeição
+          {e.register}
         </Link>
       </ReportView>
     </div>

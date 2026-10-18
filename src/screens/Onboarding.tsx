@@ -3,26 +3,12 @@ import { useRef, useState, type ChangeEvent, type FormEvent } from 'react';
 import { useNavigate } from 'react-router';
 import { Logo } from '../components/Logo';
 import { useToast } from '../components/Toast';
-import { importBackup, parseBackup } from '../data/backup';
+import { LanguagePicker } from '../components/LanguagePicker';
+import { BackupError, importBackup, parseBackup } from '../data/backup';
 import { requestPersistentStorage, saveProfileName } from '../data/repo';
+import { useI18n } from '../i18n/I18nProvider';
 
-const FEATURES = [
-  {
-    icon: NotebookPen,
-    title: 'Registre o que você comeu',
-    text: 'Do seu jeito, na hora ou depois: "café com leite e pão na chapa".',
-  },
-  {
-    icon: ThermometerIcon,
-    title: 'Termômetro da alimentação',
-    text: 'Depois de 7 dias, veja a qualidade da sua alimentação em uma nota de A a E.',
-  },
-  {
-    icon: FileText,
-    title: 'Relatórios para compartilhar',
-    text: 'Mostre ao seu nutricionista ou cole em uma IA para receber sugestões.',
-  },
-];
+const FEATURE_ICONS = [NotebookPen, ThermometerIcon, FileText];
 
 export function OnboardingScreen() {
   const navigate = useNavigate();
@@ -30,6 +16,8 @@ export function OnboardingScreen() {
   const [saving, setSaving] = useState(false);
   const fileRef = useRef<HTMLInputElement>(null);
   const toast = useToast();
+  const { t } = useI18n();
+  const o = t.onboarding;
   const trimmed = name.trim();
 
   // Para quem já usava o EatMate em outro aparelho: restaura o backup (inclusive o nome).
@@ -41,10 +29,10 @@ export function OnboardingScreen() {
       const backup = parseBackup(await file.text());
       const summary = await importBackup(backup);
       void requestPersistentStorage();
-      toast(`Backup restaurado: ${summary.meals} refeições.`);
-      if (!backup.profile) toast('Agora é só dizer como podemos te chamar.', 'info');
+      toast(o.restored(summary.meals));
+      if (!backup.profile) toast(o.askName, 'info');
     } catch (error) {
-      toast(error instanceof Error ? error.message : 'Não foi possível ler o arquivo.', 'error');
+      toast(error instanceof BackupError ? t.backup[error.code] : t.backup.readError, 'error');
     }
   };
 
@@ -61,32 +49,37 @@ export function OnboardingScreen() {
     <div className="onboarding">
       <div className="onboarding-hero">
         <Logo size={76} />
-        <h1>Bem-vindo ao EatMate</h1>
-        <p className="muted">Seu diário alimentar simples, sem contar calorias.</p>
+        <h1>{o.title}</h1>
+        <p className="muted">{o.subtitle}</p>
       </div>
 
+      <LanguagePicker compact />
+
       <ul className="feature-list">
-        {FEATURES.map(({ icon: Icon, title, text }) => (
-          <li key={title} className="feature">
-            <span className="feature-icon">
-              <Icon size={22} aria-hidden="true" />
-            </span>
-            <span>
-              <strong>{title}</strong>
-              <span className="muted small feature-text">{text}</span>
-            </span>
-          </li>
-        ))}
+        {o.features.map(({ title, text }, i) => {
+          const Icon = FEATURE_ICONS[i] ?? NotebookPen;
+          return (
+            <li key={title} className="feature">
+              <span className="feature-icon">
+                <Icon size={22} aria-hidden="true" />
+              </span>
+              <span>
+                <strong>{title}</strong>
+                <span className="muted small feature-text">{text}</span>
+              </span>
+            </li>
+          );
+        })}
       </ul>
 
       <form className="card stack" onSubmit={submit}>
         <label className="field">
-          <span className="field-label">Como podemos te chamar?</span>
+          <span className="field-label">{o.nameLabel}</span>
           <input
             className="input"
             name="name"
             autoComplete="given-name"
-            placeholder="Seu nome"
+            placeholder={o.namePlaceholder}
             value={name}
             maxLength={40}
             onChange={(e) => setName(e.target.value)}
@@ -94,12 +87,12 @@ export function OnboardingScreen() {
           />
         </label>
         <button type="submit" className="btn btn-primary btn-block" disabled={!trimmed || saving}>
-          Começar
+          {o.start}
         </button>
       </form>
 
       <button type="button" className="btn btn-ghost" onClick={() => fileRef.current?.click()}>
-        <Upload size={18} aria-hidden="true" /> Já usa o EatMate? Restaurar backup
+        <Upload size={18} aria-hidden="true" /> {o.restore}
       </button>
       <input
         ref={fileRef}
@@ -107,13 +100,13 @@ export function OnboardingScreen() {
         accept="application/json,.json"
         className="visually-hidden"
         onChange={restore}
-        aria-label="Arquivo de backup"
+        aria-label={t.common.backupFile}
         tabIndex={-1}
       />
 
       <p className="privacy-note">
         <Lock size={16} aria-hidden="true" />
-        Seus dados ficam guardados só neste aparelho.
+        {o.privacy}
       </p>
     </div>
   );

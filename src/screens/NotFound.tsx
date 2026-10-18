@@ -1,43 +1,46 @@
 import { Compass, TriangleAlert } from 'lucide-react';
 import { Link, useRouteError } from 'react-router';
 import { EmptyState } from '../components/EmptyState';
+import { useI18n } from '../i18n/I18nProvider';
 
 export function NotFoundScreen() {
+  const { t } = useI18n();
   return (
     <EmptyState
       icon={<Compass size={30} />}
-      title="Página não encontrada"
+      title={t.notFound.title}
       action={
         <Link to="/" className="btn btn-primary">
-          Voltar ao início
+          {t.notFound.home}
         </Link>
       }
     >
-      Este endereço não existe no EatMate.
+      {t.notFound.text}
     </EmptyState>
   );
 }
 
 export function ErrorScreen() {
   const error = useRouteError();
+  const { t } = useI18n();
   console.error(error);
   return (
     <div className="app">
       <main className="app-main">
         <EmptyState
           icon={<TriangleAlert size={30} />}
-          title="Algo deu errado"
+          title={t.notFound.errorTitle}
           action={
             <a
               href="#/"
               className="btn btn-primary"
               onClick={() => setTimeout(() => window.location.reload(), 0)}
             >
-              Recarregar o app
+              {t.notFound.reload}
             </a>
           }
         >
-          Seus dados continuam salvos neste aparelho. Tente recarregar o app.
+          {t.notFound.errorText}
         </EmptyState>
       </main>
     </div>

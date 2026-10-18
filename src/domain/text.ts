@@ -2,6 +2,9 @@
 export function normalize(text: string): string {
   return text
     .toLowerCase()
+    .replace(/ß/g, 'ss')
+    .replace(/œ/g, 'oe')
+    .replace(/æ/g, 'ae')
     .normalize('NFD')
     .replace(/[̀-ͯ]/g, '')
     .replace(/[^a-z0-9\s]/g, ' ')
@@ -9,33 +12,17 @@ export function normalize(text: string): string {
     .trim();
 }
 
-/**
- * Plural → singular, de forma simplificada, para palavras já normalizadas.
- * Não precisa ser perfeito: a mesma regra é aplicada ao texto digitado e aos
- * nomes da base de alimentos, então "pães", "torradas" e "ovos" casam com
- * "pão", "torrada" e "ovo".
- */
-export function singularize(word: string): string {
-  if (word.length <= 3 || /\d/.test(word)) return word;
-  // "franceses" → "frances" (e depois "france", como o próprio "frances").
-  if (word.endsWith('eses')) word = word.slice(0, -2);
-  if (word.endsWith('oes') || word.endsWith('aes')) return `${word.slice(0, -3)}ao`;
-  if (word.endsWith('ais')) return `${word.slice(0, -3)}al`;
-  if (word.endsWith('eis')) return `${word.slice(0, -3)}el`;
-  if (word.endsWith('ois')) return `${word.slice(0, -3)}ol`;
-  if (word.endsWith('res') || word.endsWith('zes')) return word.slice(0, -2);
-  if (word.endsWith('ns')) return `${word.slice(0, -2)}m`;
-  if (word.endsWith('s') && !word.endsWith('ss')) return word.slice(0, -1);
-  return word;
-}
-
 export function tokenize(text: string): string[] {
   const normalized = normalize(text);
   return normalized ? normalized.split(' ') : [];
 }
 
-/** Chave usada para comparar nomes de alimentos: normalizada e no singular. */
-export function foodKey(text: string): string {
+/**
+ * Chave usada para comparar nomes de alimentos: normalizada e no singular.
+ * A mesma regra vale para o texto digitado e para a base, então "torradas"
+ * casa com "torrada" mesmo que a regra de plural não seja perfeita.
+ */
+export function foodKey(text: string, singularize: (word: string) => string): string {
   return tokenize(text).map(singularize).join(' ');
 }
 

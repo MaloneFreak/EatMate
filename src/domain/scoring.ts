@@ -64,9 +64,6 @@ export function averageGradeLetter(points: number): Grade {
   return 'E';
 }
 
-const percent = (value: number) => `${Math.round(value * 100)}%`;
-const decimal = (value: number) => value.toLocaleString('pt-BR', { maximumFractionDigits: 1 });
-
 export function computeScore(days: ScoreDay[]): ScoreResult | null {
   const registered = days.filter((d) => d.meals.length > 0);
   if (!registered.length) return null;
@@ -106,41 +103,11 @@ export function computeScore(days: ScoreDay[]): ScoreResult | null {
   const regularityScore = mainMealsShare * 100;
 
   const components: ScoreComponent[] = [
-    {
-      key: 'qualidade',
-      label: 'Qualidade nutricional',
-      weight: SCORE_WEIGHTS.qualidade,
-      score: quality,
-      detail: `Média das notas dos alimentos: ${averageGradeLetter(quality)}`,
-    },
-    {
-      key: 'processamento',
-      label: 'Grau de processamento',
-      weight: SCORE_WEIGHTS.processamento,
-      score: processing,
-      detail: `${percent(inNatura / foods.length)} in natura ou minimamente processados · ${percent(ultra / foods.length)} ultraprocessados`,
-    },
-    {
-      key: 'frutas_verduras',
-      label: 'Frutas, verduras e legumes',
-      weight: SCORE_WEIGHTS.frutas_verduras,
-      score: fvScore,
-      detail: `${decimal(fvPerDay)} porções por dia (meta: ${FV_TARGET_PER_DAY})`,
-    },
-    {
-      key: 'variedade',
-      label: 'Variedade',
-      weight: SCORE_WEIGHTS.variedade,
-      score: varietyScore,
-      detail: `${distinct} alimentos diferentes com nota A, B ou C (meta: ${target})`,
-    },
-    {
-      key: 'regularidade',
-      label: 'Regularidade das refeições',
-      weight: SCORE_WEIGHTS.regularidade,
-      score: regularityScore,
-      detail: `${percent(mainMealsShare)} das refeições principais registradas (café da manhã, almoço e jantar)`,
-    },
+    { key: 'qualidade', weight: SCORE_WEIGHTS.qualidade, score: quality },
+    { key: 'processamento', weight: SCORE_WEIGHTS.processamento, score: processing },
+    { key: 'frutas_verduras', weight: SCORE_WEIGHTS.frutas_verduras, score: fvScore },
+    { key: 'variedade', weight: SCORE_WEIGHTS.variedade, score: varietyScore },
+    { key: 'regularidade', weight: SCORE_WEIGHTS.regularidade, score: regularityScore },
   ];
 
   const total = Math.round(components.reduce((sum, c) => sum + c.weight * c.score, 0));
@@ -148,5 +115,15 @@ export function computeScore(days: ScoreDay[]): ScoreResult | null {
     total,
     grade: gradeFromScore(total),
     components: components.map((c) => ({ ...c, score: Math.round(c.score) })),
+    facts: {
+      averageGrade: averageGradeLetter(quality),
+      inNaturaShare: inNatura / foods.length,
+      ultraShare: ultra / foods.length,
+      fvPerDay,
+      fvTarget: FV_TARGET_PER_DAY,
+      distinctGood: distinct,
+      varietyTarget: target,
+      mainMealsShare,
+    },
   };
 }

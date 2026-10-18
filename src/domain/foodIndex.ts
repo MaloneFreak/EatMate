@@ -1,4 +1,6 @@
-import { BUILTIN_FOODS } from './foods';
+import { localizedFoods } from './foods';
+import { LANGUAGE_RULES } from './lang';
+import type { Language } from './language';
 import { capitalizeFirst, foodKey, normalize } from './text';
 import type { Food } from './types';
 
@@ -27,8 +29,8 @@ export interface FoodMatch {
 }
 
 /**
- * Índice de busca dos alimentos (base do app + alimentos personalizados).
- * Alimentos personalizados têm prioridade em caso de nomes repetidos.
+ * Índice de busca dos alimentos (base do app no idioma escolhido + alimentos
+ * personalizados). Alimentos personalizados têm prioridade em caso de nomes repetidos.
  */
 export class FoodIndex {
   readonly foods: Food[];
@@ -36,8 +38,14 @@ export class FoodIndex {
   private readonly byKey = new Map<string, FoodTerm>();
   private readonly terms: FoodTerm[] = [];
   readonly maxTermLength: number;
+  private readonly singularize: (word: string) => string;
 
-  constructor(customFoods: Food[] = [], builtinFoods: Food[] = BUILTIN_FOODS) {
+  constructor(
+    customFoods: Food[] = [],
+    readonly language: Language = 'pt',
+    builtinFoods: Food[] = localizedFoods(language),
+  ) {
+    this.singularize = LANGUAGE_RULES[language].singularize;
     this.foods = [...customFoods, ...builtinFoods];
     let maxLength = 1;
     for (const food of this.foods) {
@@ -45,7 +53,7 @@ export class FoodIndex {
       this.byId.set(food.id, food);
       const texts = [food.name, ...(food.aliases ?? [])];
       texts.forEach((text, i) => {
-        const key = foodKey(text);
+        const key = foodKey(text, this.singularize);
         if (!key || this.byKey.has(key)) return;
         const term: FoodTerm = { food, text, key, normalized: normalize(text), isName: i === 0 };
         this.byKey.set(key, term);
@@ -67,7 +75,7 @@ export class FoodIndex {
 
   /** Procura o nome exato, ignorando acentos, maiúsculas e plural. */
   lookup(text: string): FoodTerm | undefined {
-    return this.byKey.get(foodKey(text));
+    return this.byKey.get(foodKey(text, this.singularize));
   }
 
   /** Maior nome conhecido que começa na posição `start` da lista de chaves de palavras. */
@@ -76,6 +84,18 @@ export class FoodIndex {
     for (let length = max; length >= 1; length--) {
       const term = this.byKey.get(keys.slice(start, start + length).join(' '));
       if (term) return { term, length };
+    }
+    return undefined;
+  }
+
+  /**
+   * Alimento pela última parte de uma palavra composta ("kirschkuch" → "kuch"):
+   * a parte final precisa ter ao menos 4 letras e sobrar ao menos 3 antes dela.
+   */
+  matchSuffix(key: string): FoodTerm | undefined {
+    for (let cut = 3; cut <= key.length - 4; cut++) {
+      const term = this.byKey.get(key.slice(cut));
+      if (term) return term;
     }
     return undefined;
   }
@@ -90,7 +110,7 @@ export class FoodIndex {
   ): FoodSuggestion[] {
     const normalized = normalize(query);
     if (!normalized) return [];
-    const key = foodKey(query);
+    const key = foodKey(query, this.singularize);
     const best = new Map<string, { term: FoodTerm; score: number }>();
 
     for (const term of this.terms) {
@@ -119,10 +139,14 @@ function scoreTerm(term: FoodTerm, normalized: string, key: string): number {
   return 0;
 }
 
-let defaultIndex: FoodIndex | undefined;
+const defaultIndexes = new Map<Language, FoodIndex>();
 
 /** Índice somente com a base do app (sem alimentos personalizados). */
-export function getDefaultFoodIndex(): FoodIndex {
-  defaultIndex ??= new FoodIndex();
-  return defaultIndex;
+export function getDefaultFoodIndex(language: Language = 'pt'): FoodIndex {
+  let index = defaultIndexes.get(language);
+  if (!index) {
+    index = new FoodIndex([], language);
+    defaultIndexes.set(language, index);
+  }
+  return index;
 }

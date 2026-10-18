@@ -4,7 +4,7 @@ import { isFoodGroup } from '../domain/groups';
 import { isMealType } from '../domain/meals';
 import type { AppSettings, CustomFood, Meal, Profile, SavedReport } from '../domain/types';
 import { db, uid } from './db';
-import { getProfile, getSettings, updateSettings } from './repo';
+import { getProfile, getSettings, migrateReports, updateSettings } from './repo';
 
 export interface BackupFile {
   app: 'eatmate';
@@ -15,6 +15,14 @@ export interface BackupFile {
   meals: Meal[];
   customFoods: CustomFood[];
   reports: SavedReport[];
+}
+
+/** Erro ao ler um arquivo de backup; `code` escolhe a mensagem no idioma do app. */
+export class BackupError extends Error {
+  constructor(readonly code: 'invalidJson' | 'notEatmate') {
+    super(code);
+    this.name = 'BackupError';
+  }
 }
 
 export interface ImportSummary {
@@ -97,11 +105,18 @@ function sanitizeCustomFood(raw: unknown): CustomFood | undefined {
 
 const isNumber = (v: unknown): v is number => typeof v === 'number' && Number.isFinite(v);
 const isStringArray = (v: unknown) => Array.isArray(v) && v.every((x) => typeof x === 'string');
+/** Destaques: texto pronto (relatórios antigos, versão 1) ou chave da mensagem (versão 2). */
+const isInsightList = (v: unknown) =>
+  Array.isArray(v) &&
+  v.every((x) => typeof x === 'string' || (isObject(x) && typeof x.key === 'string'));
 const isArrayOf = (v: unknown, test: (x: Record<string, unknown>) => boolean) =>
   Array.isArray(v) && v.every((x) => isObject(x) && test(x));
 const isDate = (v: unknown) => typeof v === 'string' && isValidISODate(v);
 
-/** Confere a estrutura de um relatório salvo, para um arquivo corrompido não quebrar as telas. */
+/**
+ * Confere a estrutura de um relatório salvo, para um arquivo corrompido não quebrar as telas.
+ * Relatórios da versão 1 (com textos em português) são aceitos e gerados novamente ao importar.
+ */
 function isReportData(d: Record<string, unknown>): boolean {
   const score = d.score;
   const scoreOk =
@@ -109,10 +124,7 @@ function isReportData(d: Record<string, unknown>): boolean {
     (isObject(score) &&
       isNumber(score.total) &&
       isGrade(score.grade) &&
-      isArrayOf(
-        score.components,
-        (c) => typeof c.label === 'string' && isNumber(c.score) && isNumber(c.weight),
-      ));
+      isArrayOf(score.components, (c) => isNumber(c.score) && isNumber(c.weight)));
   const previous = d.previous;
   const previousOk =
     previous === null ||
@@ -134,12 +146,12 @@ function isReportData(d: Record<string, unknown>): boolean {
     isObject(d.gradeDistribution) &&
     isObject(d.novaDistribution) &&
     isStringArray(d.unclassified) &&
-    isStringArray(d.positives) &&
-    isStringArray(d.attention) &&
+    isInsightList(d.positives) &&
+    isInsightList(d.attention) &&
     isArrayOf(d.groups, (g) => isFoodGroup(g.group) && isNumber(g.count) && isNumber(g.days)) &&
     isArrayOf(
       d.markers,
-      (m) => typeof m.label === 'string' && isNumber(m.days) && isNumber(m.count),
+      (m) => typeof m.key === 'string' && isNumber(m.days) && isNumber(m.count),
     ) &&
     isArrayOf(d.mealRegularity, (m) => isMealType(m.type) && isNumber(m.days)) &&
     isArrayOf(d.topFoods, (f) => typeof f.name === 'string' && isNumber(f.count)) &&
@@ -165,16 +177,16 @@ function sanitizeReport(raw: unknown): SavedReport | undefined {
   return raw as unknown as SavedReport;
 }
 
-/** Lê e valida o conteúdo de um arquivo de backup. Lança um erro com mensagem amigável se for inválido. */
+/** Lê e valida o conteúdo de um arquivo de backup. Lança um `BackupError` se for inválido. */
 export function parseBackup(text: string): BackupFile {
   let data: unknown;
   try {
     data = JSON.parse(text);
   } catch {
-    throw new Error('O arquivo não é um backup válido do EatMate (JSON inválido).');
+    throw new BackupError('invalidJson');
   }
   if (!isObject(data) || data.app !== 'eatmate' || !Array.isArray(data.meals)) {
-    throw new Error('Este arquivo não parece ser um backup do EatMate.');
+    throw new BackupError('notEatmate');
   }
   const profile =
     isObject(data.profile) && str(data.profile.name)
@@ -224,6 +236,7 @@ export async function importBackup(backup: BackupFile): Promise<ImportSummary> {
       ],
     });
   });
+  await migrateReports();
   return {
     meals: backup.meals.length,
     customFoods: backup.customFoods.length,

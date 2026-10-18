@@ -6,3 +6,11 @@ test-results
 package-lock.json
 # A base de alimentos fica em formato de tabela (uma linha por alimento), mais fácil de ler e editar.
 src/domain/foods.ts
+# O mesmo vale para os nomes de alimentos e as listas de palavras de cada idioma.
+src/domain/foodNames/*.ts
+!src/domain/foodNames/index.ts
+!src/domain/foodNames/types.ts
+!src/domain/foodNames/*.test.ts
+src/domain/lang/*.ts
+!src/domain/lang/index.ts
+!src/domain/lang/types.ts

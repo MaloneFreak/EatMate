@@ -112,18 +112,74 @@ describe('parseFoodText', () => {
 
 describe('splitTyping', () => {
   it('isola o alimento que está sendo digitado', () => {
-    expect(splitTyping('arroz, fei')).toEqual({ done: 'arroz,', leading: '', query: 'fei' });
-    expect(splitTyping('pão com mant')).toEqual({ done: 'pão com ', leading: '', query: 'mant' });
-    expect(splitTyping('tomei café e comi torr')).toEqual({
+    expect(splitTyping('arroz, fei', 'pt')).toEqual({ done: 'arroz,', leading: '', query: 'fei' });
+    expect(splitTyping('pão com mant', 'pt')).toEqual({
+      done: 'pão com ',
+      leading: '',
+      query: 'mant',
+    });
+    expect(splitTyping('tomei café e comi torr', 'pt')).toEqual({
       done: 'tomei café e ',
       leading: 'comi',
       query: 'torr',
     });
-    expect(splitTyping('2 fatias de pã')).toEqual({
+    expect(splitTyping('2 fatias de pã', 'pt')).toEqual({
       done: '',
       leading: '2 fatias de',
       query: 'pã',
     });
-    expect(splitTyping('banana')).toEqual({ done: '', leading: '', query: 'banana' });
+    expect(splitTyping('banana', 'pt')).toEqual({ done: '', leading: '', query: 'banana' });
+  });
+});
+
+describe('parseFoodText em inglês', () => {
+  const en = new FoodIndex([], 'en');
+  const parseEn = (text: string) =>
+    parseFoodText(text, en).map((i) => [i.name, i.foodId, i.quantity]);
+
+  it('entende frases, quantidades e unidades', () => {
+    expect(parseEn('I had a cup of coffee and two slices of toast')).toEqual([
+      ['Coffee', 'cafe', '1 cup'],
+      ['Toast', 'torrada', '2 slices'],
+    ]);
+    expect(parseEn('a bowl of oatmeal with banana and honey')).toEqual([
+      ['Oatmeal', 'aveia', '1 bowl'],
+      ['Banana', 'banana', undefined],
+      ['Honey', 'mel', undefined],
+    ]);
+  });
+
+  it('mantém os detalhes que vêm antes do alimento', () => {
+    expect(parseEn('grilled chicken, rice and beans')).toEqual([
+      ['Grilled chicken', 'frango', undefined],
+      ['Rice', 'arroz', undefined],
+      ['Beans', 'feijao', undefined],
+    ]);
+    expect(parseEn('carrot cake')).toEqual([['Carrot cake', 'bolo', undefined]]);
+  });
+
+  it('ignora o nome da refeição', () => {
+    expect(parseEn('for lunch I ate a tuna sandwich')).toEqual([
+      ['Tuna sandwich', 'sanduiche_natural', '1'],
+    ]);
+    expect(parseEn('afternoon tea with scones').map(([, id]) => id)).toEqual(['pao_doce']);
+  });
+
+  it('isola o alimento que está sendo digitado', () => {
+    expect(splitTyping('coffee and two slices of to', 'en')).toEqual({
+      done: 'coffee and ',
+      leading: 'two slices of',
+      query: 'to',
+    });
+  });
+});
+
+describe('palavras compostas em alemão', () => {
+  it('reconhece o alimento pela última parte da palavra', () => {
+    const de = new FoodIndex([], 'de');
+    const [item] = parseFoodText('Kirschkuchen', de);
+    expect(de.lookup('Kuchen')?.food.id).toBe('bolo');
+    expect(item?.foodId).toBe('bolo');
+    expect(item?.name).toBe('Kirschkuchen');
   });
 });

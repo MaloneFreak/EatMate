@@ -1,13 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import {
-  addDays,
-  dateRange,
-  diffDays,
-  formatDayMonth,
-  formatPeriod,
-  isValidISODate,
-  toISODate,
-} from './dates';
+import { addDays, dateRange, diffDays, isValidISODate, toISODate } from './dates';
 import { suggestMealType } from './meals';
 
 describe('datas', () => {
@@ -35,12 +27,6 @@ describe('datas', () => {
 
   it('usa o fuso local', () => {
     expect(toISODate(new Date(2026, 9, 18, 23, 59))).toBe('2026-10-18');
-  });
-
-  it('formata em português', () => {
-    expect(formatPeriod('2026-10-12', '2026-10-18')).toBe('12/10 a 18/10');
-    expect(formatPeriod('2026-12-28', '2027-01-03')).toBe('28/12/2026 a 03/01/2027');
-    expect(formatDayMonth('2026-10-12')).toBe('12 de outubro');
   });
 });
 
