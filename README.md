@@ -72,6 +72,10 @@ Cada alimento tem uma nota de **A** (melhor) a **E**, inspirada no [Nutri-Score]
 
 **É um app de dieta ou de contar calorias?** Não. A ideia é perceber a **qualidade** do que você come ao longo da semana, sem pesar comida nem contar calorias.
 
+**Vou perder meus registros quando o app atualizar?** Não. Atualizar só troca o app; seus registros continuam no aparelho. Além do banco do navegador, o EatMate guarda uma cópia de segurança automática de tudo o que você registra e repõe o que faltar ao abrir.
+
+**No iPhone, meus registros sumiram depois que coloquei o app na tela inicial.** O iPhone guarda separadamente os dados do Safari e os do app na tela inicial. Use sempre o mesmo (de preferência o da tela inicial). Para levar os registros de um para o outro, use **Perfil → Exportar backup** num e **Importar backup** no outro.
+
 **Apaguei o app / limpei o navegador. Perdi tudo?** Os dados ficam no navegador do aparelho, então limpar os dados do navegador apaga os registros. Por isso vale exportar um backup de vez em quando (o app mostra a data do último).
 
 **Como fico sabendo de uma versão nova?** O app avisa sozinho: aparece "Nova versão disponível" com o botão **Atualizar**. As novidades de cada versão ficam em [Releases](https://github.com/MaloneFreak/EatMate/releases) e no [histórico de mudanças](CHANGELOG.md).

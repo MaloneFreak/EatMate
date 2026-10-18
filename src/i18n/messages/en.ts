@@ -311,7 +311,7 @@ export const en: Messages = {
     save: 'Save meal',
     changesSaved: 'Changes saved!',
     saved: (meal) => `${meal} logged!`,
-    saveError: "Couldn't save the meal. Please log it again.",
+    saveError: "Couldn't save. Please try again.",
     deleteError: "Couldn't delete the meal. Please try again.",
     deleteTitle: 'Delete this meal?',
     deleteMessage: (meal, date) => `${meal} on ${date}. This can't be undone.`,

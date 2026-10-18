@@ -347,7 +347,7 @@ export const es: Messages = {
     save: 'Guardar comida',
     changesSaved: '¡Cambios guardados!',
     saved: (meal: string) => `¡Registro de ${meal.toLowerCase()} guardado!`,
-    saveError: 'No se pudo guardar la comida. Vuelve a registrarla.',
+    saveError: 'No se pudo guardar. Inténtalo de nuevo.',
     deleteError: 'No se pudo eliminar la comida. Inténtalo de nuevo.',
     deleteTitle: '¿Eliminar esta comida?',
     deleteMessage: (meal: string, date: string) =>

@@ -52,6 +52,12 @@ e2e/                   testes de ponta a ponta (Playwright), em português e em 
 - **Alimentos:** a nota, o grupo e o grau de processamento ficam em `foods.ts` (um só lugar). Cada idioma só traduz os nomes (`foodNames/<idioma>.ts`: `id → [nome, apelidos…]`). Os testes conferem se todos os alimentos foram traduzidos e se nenhum nome aparece em dois alimentos diferentes.
 - **Relatórios salvos** guardam números e chaves, não frases. Por isso, trocar o idioma muda também os relatórios antigos. Relatórios da versão 1 (que guardavam o texto em português) são gerados novamente no formato novo ao abrir o app ou ao importar um backup.
 
+## Onde os dados ficam
+
+- **Banco principal:** IndexedDB (via Dexie), em `src/data/db.ts` e `src/data/repo.ts`.
+- **Cópia de segurança automática:** `src/data/mirror.ts` guarda no `localStorage` cada refeição, alimento personalizado, perfil e configuração, **antes** de gravar no banco. Em alguns aparelhos (Safari no iPhone) o IndexedDB às vezes demora ou deixa de confirmar uma gravação; se o app recarregasse nessa hora, o registro se perderia. Ao abrir o app (e ao voltar para ele), `syncWithMirror` repõe no banco o que estiver faltando e copia para o `localStorage` o que só existe no banco. Relatórios não entram na cópia: são gerados de novo a partir das refeições.
+- **Gravações não travam a tela:** cada gravação espera a confirmação do banco por no máximo 1,5 s (`writeOptions.timeoutMs`); se demorar mais, o registro já está garantido na cópia local. Se o banco recusar a gravação, a cópia é desfeita e a tela mostra o erro.
+
 ## Como a nota é calculada
 
 A base tem **280 alimentos** reconhecidos por mais de **1.100 nomes e apelidos** em português (e tabelas equivalentes nos outros idiomas). Cada alimento tem:

@@ -359,7 +359,7 @@ export const fr: Messages = {
     save: 'Enregistrer le repas',
     changesSaved: 'Modifications enregistrées\u00a0!',
     saved: (meal: string) => `${meal}\u00a0: c’est noté\u00a0!`,
-    saveError: 'Impossible d’enregistrer le repas. Ajoutez-le à nouveau.',
+    saveError: 'Impossible d’enregistrer. Réessayez.',
     deleteError: 'Impossible de supprimer le repas. Réessayez.',
     deleteTitle: 'Supprimer ce repas\u00a0?',
     deleteMessage: (meal: string, date: string) =>

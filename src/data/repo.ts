@@ -21,11 +21,80 @@ import type {
   SavedReport,
 } from '../domain/types';
 import { db, uid } from './db';
+import {
+  clearMirror,
+  mirrorDeleteFood,
+  mirrorDeleteMeals,
+  mirrorSaveFoods,
+  mirrorSaveMeals,
+  mirrorSaveProfile,
+  mirrorSaveSettings,
+  readMirror,
+  writeMirror,
+  type Undo,
+} from './mirror';
 
 const PROFILE_KEY = 'profile';
 const SETTINGS_KEY = 'settings';
 
 const DEFAULT_SETTINGS: AppSettings = { dismissedPeriods: [] };
+
+// ---------------------------------------------------------------- Gravação
+
+/** Quanto esperar a confirmação do banco antes de seguir (o registro já está na cópia local). */
+export const writeOptions = { timeoutMs: 1500 };
+
+/**
+ * Espera a gravação no banco, que já foi feita antes na cópia de segurança local
+ * (mirror.ts). Se o banco demorar mais que `writeOptions.timeoutMs` (acontece no
+ * Safari do iPhone), segue assim mesmo: o registro está garantido na cópia e volta
+ * para o banco em `syncWithMirror`. Se o banco recusar a gravação, a cópia é
+ * desfeita e o erro chega à tela.
+ */
+async function commit(write: Promise<unknown>, undo: Undo): Promise<void> {
+  let timedOut = false;
+  let timer: ReturnType<typeof setTimeout> | undefined;
+  const confirmed = write.then(
+    () => undefined,
+    (error: unknown) => {
+      if (!timedOut) {
+        undo();
+        throw error;
+      }
+      // A tela já seguiu: a cópia local continua valendo e o banco é refeito a partir dela.
+      console.error('A gravação atrasada falhou; repondo a partir da cópia local', error);
+      void syncWithMirror().catch(() => {});
+    },
+  );
+  const timeout = new Promise<void>((resolve) => {
+    timer = setTimeout(() => {
+      timedOut = true;
+      resolve();
+    }, writeOptions.timeoutMs);
+  });
+  try {
+    await Promise.race([confirmed, timeout]);
+  } finally {
+    clearTimeout(timer);
+  }
+}
+
+/** Leitura que não pode travar a tela: sem resposta em pouco tempo, segue sem ela. */
+async function quickly<T>(read: Promise<T>, ms = 1000): Promise<T | undefined> {
+  let timer: ReturnType<typeof setTimeout> | undefined;
+  try {
+    return await Promise.race([
+      read,
+      new Promise<undefined>((resolve) => {
+        timer = setTimeout(() => resolve(undefined), ms);
+      }),
+    ]);
+  } catch {
+    return undefined;
+  } finally {
+    clearTimeout(timer);
+  }
+}
 
 // ---------------------------------------------------------------- Perfil
 
@@ -34,9 +103,10 @@ export async function getProfile(): Promise<Profile | undefined> {
 }
 
 export async function saveProfileName(name: string): Promise<Profile> {
-  const current = await getProfile();
+  const current = readMirror().profile ?? (await quickly(getProfile()));
   const profile: Profile = { name: name.trim(), createdAt: current?.createdAt ?? Date.now() };
-  await db.kv.put({ key: PROFILE_KEY, value: profile });
+  mirrorSaveProfile(profile);
+  await commit(db.kv.put({ key: PROFILE_KEY, value: profile }), () => {});
   return profile;
 }
 
@@ -56,8 +126,10 @@ export async function getSettings(): Promise<AppSettings> {
   return { ...DEFAULT_SETTINGS, ...stored, dismissedPeriods: stored?.dismissedPeriods ?? [] };
 }
 
+/** Também é usada dentro de transações, por isso grava no banco sem limite de tempo. */
 export async function updateSettings(patch: Partial<AppSettings>): Promise<AppSettings> {
   const settings = { ...(await getSettings()), ...patch };
+  mirrorSaveSettings(settings);
   await db.kv.put({ key: SETTINGS_KEY, value: settings });
   return settings;
 }
@@ -70,7 +142,9 @@ export type MealInput = Omit<Meal, 'id' | 'createdAt' | 'updatedAt' | 'items'> &
 };
 
 export async function saveMeal(input: MealInput): Promise<Meal> {
-  const existing = input.id ? await db.meals.get(input.id) : undefined;
+  const existing = input.id
+    ? (readMirror().meals[input.id] ?? (await quickly(db.meals.get(input.id))))
+    : undefined;
   const now = Date.now();
   const notes = input.notes?.trim();
   const meal: Meal = {
@@ -90,16 +164,25 @@ export async function saveMeal(input: MealInput): Promise<Meal> {
     createdAt: existing?.createdAt ?? now,
     updatedAt: now,
   };
-  await db.meals.put(meal);
+  const undo = mirrorSaveMeals([meal]);
+  await commit(db.meals.put(meal), undo);
   return meal;
 }
 
 export async function deleteMeal(id: string): Promise<void> {
-  await db.meals.delete(id);
+  const undo = mirrorDeleteMeals([id]);
+  await commit(db.meals.delete(id), undo);
 }
 
 export async function deleteDay(date: string): Promise<number> {
-  return db.meals.where('date').equals(date).delete();
+  const fromMirror = Object.values(readMirror().meals)
+    .filter((m) => m.date === date)
+    .map((m) => m.id);
+  const fromDb = (await quickly(db.meals.where('date').equals(date).primaryKeys())) ?? [];
+  const ids = [...new Set([...fromMirror, ...fromDb])];
+  const undo = mirrorDeleteMeals(ids);
+  await commit(db.meals.bulkDelete(ids), undo);
+  return ids.length;
 }
 
 // ---------------------------------------------------------------- Alimentos personalizados
@@ -107,9 +190,10 @@ export async function deleteDay(date: string): Promise<number> {
 /** Cria (ou atualiza) um alimento personalizado a partir de uma categoria escolhida pela pessoa. */
 export async function classifyFood(name: string, option: ClassifyOption): Promise<CustomFood> {
   const trimmed = name.trim();
-  const existing = (await db.customFoods.toArray()).find(
-    (f) => f.name.toLowerCase() === trimmed.toLowerCase(),
-  );
+  const sameName = (f: CustomFood) => f.name.toLowerCase() === trimmed.toLowerCase();
+  const existing =
+    Object.values(readMirror().customFoods).find(sameName) ??
+    (await quickly(db.customFoods.toArray()))?.find(sameName);
   const food: CustomFood = {
     id: existing?.id ?? `custom_${uid()}`,
     name: trimmed,
@@ -121,12 +205,14 @@ export async function classifyFood(name: string, option: ClassifyOption): Promis
     custom: true,
     createdAt: existing?.createdAt ?? Date.now(),
   };
-  await db.customFoods.put(food);
+  const undo = mirrorSaveFoods([food]);
+  await commit(db.customFoods.put(food), undo);
   return food;
 }
 
 export async function deleteCustomFood(id: string): Promise<void> {
-  await db.customFoods.delete(id);
+  const undo = mirrorDeleteFood(id);
+  await commit(db.customFoods.delete(id), undo);
 }
 
 // ---------------------------------------------------------------- Relatórios
@@ -239,7 +325,7 @@ export async function regenerateReport(id: string): Promise<SavedReport | undefi
 }
 
 export async function deleteReport(id: string): Promise<void> {
-  await db.transaction('rw', [db.reports, db.kv], async () => {
+  const write = db.transaction('rw', [db.reports, db.kv], async () => {
     const report = await db.reports.get(id);
     if (!report) return;
     await db.reports.delete(id);
@@ -251,6 +337,8 @@ export async function deleteReport(id: string): Promise<void> {
       }
     }
   });
+  // Relatórios não ficam na cópia local (são gerados de novo a partir das refeições).
+  await commit(write, () => {});
 }
 
 /** O relatório está desatualizado se os registros do período mudaram depois que ele foi gerado. */
@@ -264,6 +352,7 @@ export function isReportStale(report: SavedReport, meals: Meal[], index: FoodInd
 // ---------------------------------------------------------------- Tudo
 
 export async function clearAllData(): Promise<void> {
+  clearMirror();
   await db.transaction('rw', [db.meals, db.reports, db.customFoods, db.kv], async () => {
     await Promise.all([
       db.meals.clear(),
@@ -272,4 +361,78 @@ export async function clearAllData(): Promise<void> {
       db.kv.clear(),
     ]);
   });
+}
+
+// ---------------------------------------------------------------- Cópia de segurança local
+
+/**
+ * Acerta o banco com a cópia de segurança local (ao abrir o app e ao voltar para ele):
+ * repõe no banco o que ele perdeu ou não chegou a gravar, e guarda na cópia o que só
+ * existe no banco (por exemplo, registros feitos antes desta versão do app).
+ * Devolve quantas mudanças foram feitas no banco.
+ */
+export async function syncWithMirror(): Promise<number> {
+  const mirror = readMirror();
+  const [meals, foods, profileRow, settingsRow] = await Promise.all([
+    db.meals.toArray(),
+    db.customFoods.toArray(),
+    db.kv.get(PROFILE_KEY),
+    db.kv.get(SETTINGS_KEY),
+  ]);
+
+  // Cópia → banco
+  const mealsById = new Map(meals.map((m) => [m.id, m]));
+  const putMeals = Object.values(mirror.meals).filter((m) => {
+    const current = mealsById.get(m.id);
+    return !current || current.updatedAt < m.updatedAt;
+  });
+  const dropMeals = Object.entries(mirror.deletedMeals)
+    .filter(([id, at]) => {
+      const current = mealsById.get(id);
+      return !!current && current.updatedAt <= at;
+    })
+    .map(([id]) => id);
+  const foodIds = new Set(foods.map((f) => f.id));
+  const putFoods = Object.values(mirror.customFoods).filter((f) => !foodIds.has(f.id));
+  const dropFoods = Object.keys(mirror.deletedFoods).filter((id) => foodIds.has(id));
+  // Perfil e configurações só voltam se sumiram do banco: a cópia lida acima pode ser
+  // anterior a uma mudança feita enquanto o banco respondia (ex.: início da Semana 1).
+  const putProfile = !!mirror.profile && !profileRow;
+  const putSettings = !!mirror.settings && !settingsRow;
+
+  const changes =
+    putMeals.length +
+    dropMeals.length +
+    putFoods.length +
+    dropFoods.length +
+    (putProfile ? 1 : 0) +
+    (putSettings ? 1 : 0);
+  if (changes) {
+    await db.transaction('rw', [db.meals, db.customFoods, db.kv], async () => {
+      if (putMeals.length) await db.meals.bulkPut(putMeals);
+      if (dropMeals.length) await db.meals.bulkDelete(dropMeals);
+      if (putFoods.length) await db.customFoods.bulkPut(putFoods);
+      if (dropFoods.length) await db.customFoods.bulkDelete(dropFoods);
+      if (putProfile) await db.kv.put({ key: PROFILE_KEY, value: mirror.profile });
+      if (putSettings) await db.kv.put({ key: SETTINGS_KEY, value: mirror.settings });
+    });
+  }
+
+  // Banco → cópia (lida de novo: pode ter mudado enquanto o banco respondia)
+  const updated = readMirror();
+  for (const meal of meals) {
+    const deletedAt = updated.deletedMeals[meal.id];
+    if (deletedAt !== undefined && meal.updatedAt <= deletedAt) continue;
+    const current = updated.meals[meal.id];
+    if (!current || current.updatedAt < meal.updatedAt) updated.meals[meal.id] = meal;
+  }
+  for (const food of foods) {
+    if (!updated.customFoods[food.id] && updated.deletedFoods[food.id] === undefined) {
+      updated.customFoods[food.id] = food;
+    }
+  }
+  if (!updated.profile && profileRow) updated.profile = profileRow.value as Profile;
+  if (!updated.settings && settingsRow) updated.settings = settingsRow.value as AppSettings;
+  writeMirror(updated);
+  return changes;
 }

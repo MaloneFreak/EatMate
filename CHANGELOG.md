@@ -2,6 +2,13 @@
 
 Todas as mudanças importantes do EatMate ficam registradas aqui. As versões seguem o [versionamento semântico](https://semver.org/lang/pt-BR/).
 
+## [1.0.2] - 2026-10-18
+
+### Correções
+
+- **Seus registros não se perdem mais.** Em alguns celulares (principalmente iPhone), o armazenamento do navegador às vezes demorava ou deixava de confirmar uma gravação; se o app recarregasse nessa hora (por exemplo, numa atualização), o registro sumia. Agora cada alteração é guardada também numa cópia de segurança automática no aparelho, e ao abrir o app tudo o que estiver faltando é reposto. Atualizar o app nunca apaga o histórico.
+- **Salvar só volta para o início com a refeição guardada.** A versão 1.0.1 voltava antes de a gravação terminar; agora o app espera a confirmação (no máximo um instante, já que a cópia de segurança garante o registro) e, se der erro, avisa e mantém você no formulário.
+
 ## [1.0.1] - 2026-10-18
 
 ### Correções
@@ -28,5 +35,6 @@ Primeira versão do EatMate. 🎉
 - **Privacidade:** sem cadastro e sem servidor — os dados ficam só no seu aparelho. Backup e restauração para trocar de celular.
 - Tema claro e escuro, alimentos personalizados e um relatório de exemplo para ver como tudo funciona antes dos 7 dias.
 
+[1.0.2]: https://github.com/MaloneFreak/EatMate/releases/tag/v1.0.2
 [1.0.1]: https://github.com/MaloneFreak/EatMate/releases/tag/v1.0.1
 [1.0.0]: https://github.com/MaloneFreak/EatMate/releases/tag/v1.0.0

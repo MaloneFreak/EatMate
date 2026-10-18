@@ -209,3 +209,45 @@ test('salvar volta para o início mesmo quando o app abriu direto no formulário
   await page.getByRole('button', { name: 'Salvar refeição' }).click();
   await expect(page.getByRole('heading', { name: 'Olá, Pedro!' })).toBeVisible();
 });
+
+test('os registros não se perdem se o banco do navegador falhar antes de recarregar', async ({
+  page,
+}) => {
+  await onboard(page);
+  await page
+    .getByRole('link', { name: /Registrar refeição/ })
+    .first()
+    .click();
+  await page.getByRole('button', { name: 'Almoço' }).click();
+  const input = page.getByRole('combobox', { name: 'O que você comeu?' });
+  await input.fill('arroz, feijão e bife');
+  await input.press('Enter');
+  await page.getByRole('button', { name: 'Salvar refeição' }).click();
+  await expect(page.getByText('Almoço registrado!')).toBeVisible();
+
+  // Simula a gravação que não chegou ao banco (IndexedDB): apaga as refeições direto nele.
+  await page.evaluate(
+    () =>
+      new Promise<void>((resolve, reject) => {
+        const open = indexedDB.open('eatmate');
+        open.onerror = () => reject(open.error);
+        open.onsuccess = () => {
+          const tx = open.result.transaction(['meals', 'kv'], 'readwrite');
+          tx.objectStore('meals').clear();
+          tx.objectStore('kv').clear();
+          tx.oncomplete = () => {
+            open.result.close();
+            resolve();
+          };
+          tx.onerror = () => reject(tx.error);
+        };
+      }),
+  );
+
+  // Recarregar (como numa atualização do app) repõe tudo a partir da cópia local.
+  await page.reload();
+  await expect(page.getByRole('heading', { name: 'Olá, Pedro!' })).toBeVisible();
+  await page.getByRole('link', { name: 'Histórico' }).click();
+  await page.getByRole('link', { name: /Hoje/ }).click();
+  await expect(page.getByText('Feijão')).toBeVisible();
+});

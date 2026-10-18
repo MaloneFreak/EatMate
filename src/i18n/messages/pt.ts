@@ -340,7 +340,7 @@ export const pt = {
     save: 'Salvar refeição',
     changesSaved: 'Alterações salvas!',
     saved: (meal: string) => `${meal} registrado!`,
-    saveError: 'Não foi possível salvar a refeição. Tente registrar de novo.',
+    saveError: 'Não foi possível salvar. Tente novamente.',
     deleteError: 'Não foi possível excluir a refeição. Tente de novo.',
     deleteTitle: 'Excluir esta refeição?',
     deleteMessage: (meal: string, date: string) =>
