@@ -25,18 +25,32 @@ export const de: LanguageRules = {
     'nachmittag', 'nachmittags', 'vormittag', 'der', 'die', 'das', 'den', 'dem', 'des', 'etwas', 'bisschen',
     'viel', 'viele', 'wenig', 'sehr', 'nur', 'auch', 'noch', 'mein', 'meine', 'meinen', 'von', 'vom', 'aus',
     'als', 'dann', 'danach', 'nachtisch', 'zwischendurch', 'ohne', 'im', 'am', 'in',
+    // mais verbos, pronomes e marcadores ("es gab", "hab mir… gemacht", "dazu ein Bier", "in der Früh")
+    'es', 'gab', 'gibt', 'mir', 'uns', 'haben', 'hat', 'gehabt', 'genommen', 'nahm', 'probiert', 'genascht',
+    'gemacht', 'genossen', 'bei', 'beim', 'nach', 'vor', 'fur', 'dazu', 'paar', 'einige', 'ca', 'circa', 'etwa',
+    'ungefahr', 'wieder', 'schon', 'mal', 'fruh',
+    // nomes de refeição e de prato (inclusive regionais: Jause, Brotzeit, Vesper, Znüni…)
+    'dessert', 'nachspeise', 'vorspeise', 'hauptspeise', 'hauptgericht', 'beilage', 'mahlzeit', 'snack',
+    'imbiss', 'jause', 'brotzeit', 'vesper', 'zmorge', 'znuni', 'zmittag', 'zvieri', 'znacht',
   ],
-  stopPhrases: [],
+  // "Tee ohne Zucker" não deve registrar o açúcar.
+  stopPhrases: [
+    'ohne zucker', 'ohne zuckerzusatz', 'ohne sussstoff', 'ohne milch', 'ohne sahne', 'ohne butter',
+    'ohne sosse', 'ohne sauce', 'ohne salz', 'ohne fett', 'ohne ol', 'ohne kase', 'ohne fleisch', 'ohne mayo',
+    'ohne ketchup', 'ohne brot', 'ohne eis', 'ohne kohlensaure',
+  ],
   numberWords: {
     ein: '1', eine: '1', einen: '1', einem: '1', einer: '1', eins: '1', zwei: '2', drei: '3', vier: '4',
     funf: '5', sechs: '6', sieben: '7', acht: '8', neun: '9', zehn: '10', halb: '', halbe: '', halben: '',
-    halber: '', halbes: '',
+    halber: '', halbes: '', eineinhalb: '1,5', anderthalb: '1,5',
   },
   units: [
-    'stuck', 'stucke', 'stuckchen', 'scheibe', 'scheiben', 'tasse', 'tassen', 'glas', 'glaser', 'becher',
-    'teller', 'schussel', 'schusseln', 'schale', 'schalen', 'loffel', 'essloffel', 'el', 'teeloffel', 'tl',
-    'dose', 'dosen', 'flasche', 'flaschen', 'portion', 'portionen', 'handvoll', 'riegel', 'packung',
-    'packungen', 'kugel', 'kugeln', 'g', 'gramm', 'kg', 'ml', 'l', 'liter',
+    'stuck', 'stucke', 'stuckchen', 'scheibe', 'scheiben', 'scheibchen', 'tasse', 'tassen', 'tasschen', 'glas',
+    'glaser', 'glaschen', 'becher', 'teller', 'schussel', 'schusseln', 'schale', 'schalen', 'loffel', 'essloffel',
+    'el', 'teeloffel', 'kaffeeloffel', 'tl', 'dose', 'dosen', 'buchse', 'flasche', 'flaschen', 'portion',
+    'portionen', 'handvoll', 'riegel', 'tafel', 'packung', 'packungen', 'paket', 'beutel', 'tute', 'kugel',
+    'kugeln', 'kanne', 'karaffe', 'krug', 'mass', 'schoppen', 'viertel', 'achtel', 'prise', 'schuss', 'schluck',
+    'zehe', 'stk', 'g', 'gramm', 'kg', 'ml', 'cl', 'dl', 'l', 'liter',
   ],
   ofWords: ['von'],
   absorbs: 'none',

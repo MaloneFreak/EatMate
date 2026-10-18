@@ -89,13 +89,16 @@ export class FoodIndex {
   }
 
   /**
-   * Alimento pela última parte de uma palavra composta ("kirschkuch" → "kuch"):
-   * a parte final precisa ter ao menos 4 letras e sobrar ao menos 3 antes dela.
+   * Alimento pela última parte de uma palavra composta, já normalizada:
+   * "ziegenkase" → Käse, "krautertee" → Tee, "himbeeren" → Beere. A regra de
+   * plural vale para cada final testado, porque ela muda a palavra inteira de
+   * outro jeito ("ziegenkase" → "ziegenkas"). A parte final precisa ter ao menos
+   * 3 letras e sobrar ao menos 3 antes dela; ganha o final mais longo.
    */
-  matchSuffix(key: string): FoodTerm | undefined {
-    for (let cut = 3; cut <= key.length - 4; cut++) {
-      const term = this.byKey.get(key.slice(cut));
-      if (term) return term;
+  matchSuffix(word: string): FoodTerm | undefined {
+    for (let cut = 3; cut <= word.length - 3; cut++) {
+      const term = this.byKey.get(this.singularize(word.slice(cut)));
+      if (term && !term.key.includes(' ')) return term;
     }
     return undefined;
   }

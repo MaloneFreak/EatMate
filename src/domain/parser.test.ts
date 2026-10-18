@@ -182,6 +182,10 @@ describe('palavras compostas em alemão', () => {
     expect(de.lookup('Kuchen')?.food.id).toBe('bolo');
     expect(item?.foodId).toBe('bolo');
     expect(item?.name).toBe('Kirschkuchen');
+    // Finais curtos, que a regra de plural mudaria na palavra inteira.
+    const ids = (text: string) => parseFoodText(text, de).map((i) => i.foodId);
+    expect(ids('Ziegenkäse, Kräutertee und Rotwein')).toEqual(['queijo', 'cha', 'vinho']);
+    expect(ids('Himbeeren')).toEqual(['frutas_vermelhas']);
   });
 });
 

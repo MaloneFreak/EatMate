@@ -32,7 +32,7 @@ export interface LanguageRules {
   absorbs: 'after' | 'before' | 'none';
   /**
    * Palavras compostas desconhecidas são reconhecidas pela última parte:
-   * "Kirschkuchen" → Kuchen (alemão).
+   * "Kirschkuchen" → Kuchen, "Ziegenkäse" → Käse (alemão).
    */
   compounds?: boolean;
   /** Onde ficam os detalhes do alimento: "frango grelhado" (after) ou "grilled chicken" (before). */

@@ -230,7 +230,7 @@ function parseSegment(segment: string, index: FoodIndex, c: Compiled): ParsedIte
     let text = match?.term.text ?? '';
     if (!match && c.rules.compounds) {
       const t = tokens[i]!;
-      const term = t.isNumber || isStopword(t, c) ? undefined : index.matchSuffix(t.key);
+      const term = t.isNumber || isStopword(t, c) ? undefined : index.matchSuffix(t.norm);
       if (term) {
         match = { term, length: 1 };
         text = t.raw;
