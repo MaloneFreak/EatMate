@@ -20,6 +20,9 @@ export function FoodInput({ index, usage, onAdd }: FoodInputProps) {
   const [text, setText] = useState('');
   const [open, setOpen] = useState(false);
   const [active, setActive] = useState(-1);
+  // Enter só escolhe uma sugestão marcada pelas setas: a lista pode abrir embaixo do
+  // ponteiro do mouse parado, e aí o "hover" não foi uma escolha da pessoa.
+  const [byKeyboard, setByKeyboard] = useState(false);
   const [hint, setHint] = useState<string | null>(null);
   const inputRef = useRef<HTMLInputElement>(null);
   const listId = useId();
@@ -36,6 +39,7 @@ export function FoodInput({ index, usage, onAdd }: FoodInputProps) {
     setText('');
     setOpen(false);
     setActive(-1);
+    setByKeyboard(false);
     setHint(null);
     inputRef.current?.focus();
   };
@@ -68,14 +72,16 @@ export function FoodInput({ index, usage, onAdd }: FoodInputProps) {
     if (event.key === 'ArrowDown' && suggestions.length) {
       event.preventDefault();
       setOpen(true);
+      setByKeyboard(true);
       setActive((i) => (i + 1) % suggestions.length);
     } else if (event.key === 'ArrowUp' && suggestions.length) {
       event.preventDefault();
       setOpen(true);
+      setByKeyboard(true);
       setActive((i) => (i <= 0 ? suggestions.length - 1 : i - 1));
     } else if (event.key === 'Enter') {
       event.preventDefault();
-      const selected = showList && active >= 0 ? suggestions[active] : undefined;
+      const selected = showList && byKeyboard && active >= 0 ? suggestions[active] : undefined;
       if (selected) choose(selected);
       else commitText();
     } else if (event.key === 'Escape') {
@@ -133,7 +139,10 @@ export function FoodInput({ index, usage, onAdd }: FoodInputProps) {
               className="suggestion"
               onMouseDown={(e) => e.preventDefault()}
               onClick={() => choose(s)}
-              onMouseEnter={() => setActive(i)}
+              onMouseEnter={() => {
+                setActive(i);
+                setByKeyboard(false);
+              }}
             >
               <GradeBadge grade={s.food.grade} />
               <span className="suggestion-text">

@@ -432,6 +432,9 @@
   font-size: 0.85rem;
   line-height: 1.15;
   text-align: center;
+  min-width: 0;
+  hyphens: auto;
+  overflow-wrap: anywhere;
 }
 
 .meal-type-option[aria-pressed='true'] {

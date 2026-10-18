@@ -113,6 +113,8 @@ function quantityAt(
   if (!first) return undefined;
   const word = first.isNumber ? undefined : c.rules.numberWords[first.norm];
   if (!first.isNumber && word === undefined) return undefined;
+  // Em alemão os substantivos (unidades incluídas) começam com maiúscula: "2 Scheiben".
+  const lower = (raw: string) => (c.rules.language === 'de' ? raw : raw.toLowerCase());
   const parts = [first.isNumber ? first.raw : word || first.raw.toLowerCase()];
 
   let end = i + 1;
@@ -120,7 +122,7 @@ function quantityAt(
   // A unidade não pode ser o começo do nome de um alimento ("un pot-au-feu", "un carré frais").
   const startsFood = (index.matchAt(keys, end)?.length ?? 0) > 1;
   if (unit && !unit.isNumber && !startsFood && (c.units.has(unit.norm) || c.units.has(unit.key))) {
-    parts.push(unit.raw.toLowerCase());
+    parts.push(lower(unit.raw));
     end++;
     // "colher de sopa", "cuillère à soupe"
     const joiner = tokens[end];
@@ -132,7 +134,7 @@ function quantityAt(
       c.complements.joiners.has(joiner.norm) &&
       c.complements.kinds.has(kind.norm)
     ) {
-      parts.push(joiner.raw.toLowerCase(), kind.raw.toLowerCase());
+      parts.push(lower(joiner.raw), lower(kind.raw));
       end += 2;
     }
   }
