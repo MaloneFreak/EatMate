@@ -347,7 +347,8 @@ export const es: Messages = {
     save: 'Guardar comida',
     changesSaved: '¡Cambios guardados!',
     saved: (meal: string) => `¡Registro de ${meal.toLowerCase()} guardado!`,
-    saveError: 'No se pudo guardar. Inténtalo de nuevo.',
+    saveError: 'No se pudo guardar la comida. Vuelve a registrarla.',
+    deleteError: 'No se pudo eliminar la comida. Inténtalo de nuevo.',
     deleteTitle: '¿Eliminar esta comida?',
     deleteMessage: (meal: string, date: string) =>
       `${meal} del ${date}. Esta acción no se puede deshacer.`,
@@ -497,6 +498,7 @@ export const es: Messages = {
       'Tus registros de comidas siguen guardados. Puedes volver a generar este informe cuando quieras.',
     deleteCustom: 'Tus registros de comidas siguen guardados.',
     deleted: 'Informe eliminado.',
+    deleteError: 'No se pudo eliminar el informe. Inténtalo de nuevo.',
     emptyTitle: 'Aún no hay informes guardados',
     emptyUnlocked:
       'El primer informe semanal aparecerá aquí cuando termine la semana. También puedes guardar el informe actual.',

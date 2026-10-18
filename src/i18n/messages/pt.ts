@@ -340,7 +340,8 @@ export const pt = {
     save: 'Salvar refeição',
     changesSaved: 'Alterações salvas!',
     saved: (meal: string) => `${meal} registrado!`,
-    saveError: 'Não foi possível salvar. Tente novamente.',
+    saveError: 'Não foi possível salvar a refeição. Tente registrar de novo.',
+    deleteError: 'Não foi possível excluir a refeição. Tente de novo.',
     deleteTitle: 'Excluir esta refeição?',
     deleteMessage: (meal: string, date: string) =>
       `${meal} de ${date}. Essa ação não pode ser desfeita.`,
@@ -490,6 +491,7 @@ export const pt = {
       'Seus registros de refeições continuam salvos. Você pode gerar este relatório de novo quando quiser.',
     deleteCustom: 'Seus registros de refeições continuam salvos.',
     deleted: 'Relatório excluído.',
+    deleteError: 'Não foi possível excluir o relatório. Tente de novo.',
     emptyTitle: 'Nenhum relatório salvo ainda',
     emptyUnlocked:
       'O primeiro relatório semanal aparece aqui quando a semana terminar. Você também pode salvar o relatório atual.',

@@ -57,9 +57,15 @@ export function DayScreen() {
       danger: true,
     });
     if (!ok) return;
-    await deleteDay(date);
-    toast(d.dayDeleted);
-    navigate('/historico', { replace: true });
+    // Sai da tela na hora; o aviso aparece quando a exclusão terminar (ver MealForm).
+    deleteDay(date).then(
+      () => toast(d.dayDeleted),
+      (error: unknown) => {
+        console.error(error);
+        toast(t.mealForm.deleteError, 'error');
+      },
+    );
+    void navigate('/historico', { replace: true });
   };
 
   return (

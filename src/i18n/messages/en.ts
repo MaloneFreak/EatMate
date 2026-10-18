@@ -311,7 +311,8 @@ export const en: Messages = {
     save: 'Save meal',
     changesSaved: 'Changes saved!',
     saved: (meal) => `${meal} logged!`,
-    saveError: "Couldn't save. Please try again.",
+    saveError: "Couldn't save the meal. Please log it again.",
+    deleteError: "Couldn't delete the meal. Please try again.",
     deleteTitle: 'Delete this meal?',
     deleteMessage: (meal, date) => `${meal} on ${date}. This can't be undone.`,
     deleted: 'Meal deleted.',
@@ -459,6 +460,7 @@ export const en: Messages = {
       'Your logged meals stay saved. You can generate this report again whenever you like.',
     deleteCustom: 'Your logged meals stay saved.',
     deleted: 'Report deleted.',
+    deleteError: "Couldn't delete the report. Please try again.",
     emptyTitle: 'No saved reports yet',
     emptyUnlocked:
       'Your first weekly report shows up here when the week ends. You can also save the current report.',
