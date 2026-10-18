@@ -187,7 +187,7 @@ export const it: Messages = {
     vegetables_few: (n: number, of: number) =>
       `Le verdure sono comparse solo in ${days(n)} su ${of}.`,
     ultra_high: (n: number, _of: number, f: Format) =>
-      `Gli ultraprocessati sono stati ${the(f.percent(n))} degli alimenti. Meglio preferire cibi freschi e piatti fatti in casa.`,
+      `Gli ultraprocessati erano ${the(f.percent(n))} degli alimenti. Preferisci cibi freschi e piatti fatti in casa.`,
     sugary: (n: number) =>
       `Bibite e bevande zuccherate sono comparse ${times(n)}. Sostituiscile con acqua, acqua frizzante e limone o un succo fresco senza zucchero.`,
     sweets: (n: number, of: number) => `Dolci e merendine sono comparsi in ${days(n)} su ${of}.`,
