@@ -62,17 +62,17 @@ test.describe('em inglês', () => {
 
 test.describe('outros idiomas', () => {
   for (const [locale, heading] of [
-    ['es-ES', 'EatMate'],
-    ['de-DE', 'EatMate'],
-    ['fr-FR', 'EatMate'],
-    ['it-IT', 'EatMate'],
+    ['es-ES', 'Te damos la bienvenida a EatMate'],
+    ['de-DE', 'Willkommen bei EatMate'],
+    ['fr-FR', 'Bienvenue sur EatMate'],
+    ['it-IT', 'Ti diamo il benvenuto in EatMate'],
   ] as const) {
     test.describe(locale, () => {
       test.use({ locale });
       test(`abre em ${locale}`, async ({ page }) => {
         await page.goto('./');
         await expect(page.locator('html')).toHaveAttribute('lang', locale);
-        await expect(page.getByRole('heading', { level: 1 })).toContainText(heading);
+        await expect(page.getByRole('heading', { level: 1 })).toHaveText(heading);
         await expect(page.getByRole('combobox')).toHaveValue(locale.slice(0, 2));
       });
     });

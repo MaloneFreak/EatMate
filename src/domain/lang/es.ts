@@ -19,7 +19,8 @@ export const es: LanguageRules = {
   separators: ['y', 'e', 'con', 'o', 'u', 'mas'],
   stopwords: [
     'comi', 'como', 'comer', 'comido', 'comiendo', 'comimos', 'tome', 'tomo', 'tomar', 'tomado', 'bebi',
-    'bebo', 'beber', 'bebido', 'desayune', 'almorce', 'cene', 'merende', 'yo', 'me', 'hoy', 'ayer',
+    'bebo', 'beber', 'bebido', 'desayune', 'almorce', 'cene', 'merende', 'desayunar', 'almorzar', 'cenar',
+    'merendar', 'desayunamos', 'almorzamos', 'cenamos', 'merendamos', 'picar', 'pique', 'probe', 'yo', 'me', 'hoy', 'ayer',
     'manana', 'tarde', 'noche', 'desayuno', 'almuerzo', 'comida', 'cena', 'merienda', 'postre', 'el', 'la',
     'los', 'las', 'lo', 'unos', 'unas', 'de', 'del', 'al', 'a', 'en', 'para', 'por', 'poco', 'poquito',
     'mucho', 'mucha', 'muchos', 'muy', 'bastante', 'solo', 'tambien', 'mi', 'mis', 'algo', 'que',
@@ -33,7 +34,7 @@ export const es: LanguageRules = {
   units: [
     ...withPlurals(['unidad', 'rebanada', 'taza', 'tacita', 'vaso', 'plato', 'cuchara', 'cucharada',
       'cucharadita', 'lata', 'botella', 'trozo', 'pedazo', 'punado', 'tazon', 'loncha', 'lonja', 'feta',
-      'bola', 'barra', 'paquete', 'gramo', 'litro', 'porcion'], (w) => (/[aeiou]$/.test(w) ? `${w}s` : `${w}es`)),
+      'bola', 'barra', 'paquete', 'gramo', 'litro', 'porcion', 'copa', 'copita', 'jarra', 'pinta', 'cucharon'], (w) => (/[aeiou]$/.test(w) ? `${w}s` : `${w}es`)),
     'porciones', 'bol', 'boles', 'g', 'gr', 'kg', 'ml', 'l',
   ],
   ofWords: ['de', 'del'],

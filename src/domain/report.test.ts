@@ -127,6 +127,10 @@ it('gera o texto no idioma escolhido', () => {
   });
   const md = reportToMarkdown(data, { t: MESSAGES.en, f: createFormat('en-US'), index: en });
   expect(md).toContain('Brown rice');
+  const de = new FoodIndex([], 'de');
+  const deMd = reportToMarkdown(data, { t: MESSAGES.de, f: createFormat('de-DE'), index: de });
+  expect(deMd).toContain('Nachmittagssnack');
+  expect(deMd).not.toContain('\u00ad');
   const same = buildReport({
     meals: buildDemoMeals('2026-10-18', index),
     index,

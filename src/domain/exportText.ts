@@ -128,7 +128,8 @@ export function reportToMarkdown(report: ReportData, options: ExportOptions): st
 
   push('---');
   push(e.footer(generatedAt ? f.dateTime(generatedAt) : undefined));
-  return lines.join('\n');
+  // Hífens opcionais (\u00ad) só servem para quebrar linha na tela.
+  return lines.join('\n').replace(/\u00ad/g, '');
 }
 
 /** Texto pronto para colar em uma IA (ChatGPT, Claude, Gemini…) pedindo sugestões. */

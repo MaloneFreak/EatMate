@@ -103,11 +103,12 @@ export const de: Messages = {
       `Thermometer: ${score} von 100 Punkten, Note ${grade}`,
   },
 
+  // Hífen opcional (\u00ad): os nomes longos quebram na junção da palavra composta.
   mealTypes: {
     cafe_manha: 'Frühstück',
-    lanche_manha: 'Vormittagssnack',
+    lanche_manha: 'Vormittags\u00adsnack',
     almoco: 'Mittagessen',
-    cafe_tarde: 'Nachmittagssnack',
+    cafe_tarde: 'Nachmittags\u00adsnack',
     jantar: 'Abendessen',
     ceia: 'Spätsnack',
   } satisfies Record<MealType, string>,

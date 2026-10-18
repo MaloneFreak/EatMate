@@ -203,6 +203,16 @@ describe('complementos e unidades em outros idiomas', () => {
     expect(parseIn('pt', 'suco de limao')).toEqual([['Suco de limão', 'suco_natural', undefined]]);
   });
 
+  it('entende frases em espanhol', () => {
+    expect(parseIn('es', 'para cenar tomé una copa de vino tinto y tacos')).toEqual([
+      ['Vino tinto', 'vinho', '1 copa'],
+      ['Tacos', 'sanduiche', undefined],
+    ]);
+    expect(parseIn('es', 'un vaso de zumo de naranja')).toEqual([
+      ['Zumo de naranja', 'suco_natural', '1 vaso'],
+    ]);
+  });
+
   it('não trata como unidade o começo do nome de um alimento', () => {
     expect(parseIn('fr', 'un pot-au-feu')[0]?.[0]).toBe('Pot-au-feu');
   });
