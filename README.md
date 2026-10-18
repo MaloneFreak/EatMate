@@ -82,9 +82,11 @@ Outros comandos:
 
 O repositório já vem com o workflow [`deploy.yml`](.github/workflows/deploy.yml), que publica o app a cada push na branch `main`. Só é preciso ativar uma vez:
 
-1. No GitHub, abra **Settings → Pages**.
-2. Em **Build and deployment → Source**, escolha **GitHub Actions**.
-3. Faça merge na `main` (ou rode o workflow manualmente em **Actions**).
+1. Confira se a branch padrão é a `main` (**Settings → General → Default branch**). O ambiente de publicação do Pages só aceita a branch padrão.
+2. Abra **Settings → Pages** e, em **Build and deployment → Source**, escolha **GitHub Actions**.
+3. Rode o workflow em **Actions → Publicar no GitHub Pages → Run workflow** (depois disso, cada push na `main` publica sozinho).
+
+Enquanto o Pages não estiver ativado, o workflow não falha: ele só pula a publicação e deixa um aviso.
 
 O endereço fica parecido com `https://<seu-usuario>.github.io/EatMate/`. Como o app usa caminhos relativos e rotas com `#`, ele também funciona em qualquer outra hospedagem de arquivos estáticos (Netlify, Vercel, Cloudflare Pages…) — basta publicar a pasta `dist/`.
 
