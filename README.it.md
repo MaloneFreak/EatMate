@@ -22,7 +22,7 @@ Basta aprire il link sul telefono o sul computer. **Niente da scaricare dagli st
 
 1. **Dicci come ti chiami.** Tutto qui: niente email né password.
 2. **Tocca "Registra un pasto"** e scrivi cosa hai mangiato con parole tue. EatMate separa gli alimenti, ti dà suggerimenti mentre scrivi e mostra il voto di ognuno. Puoi registrare subito o più tardi, anche per i giorni passati.
-3. **Hai sbagliato?** Nella **Cronologia** puoi modificare o eliminare qualsiasi pasto.
+3. **Hai sbagliato?** Nello **Storico** puoi modificare o eliminare qualsiasi pasto.
 4. **Dopo 7 giorni** di registrazioni, il **termometro** appare nella schermata iniziale con il tuo punteggio (0–100 e A–E).
 5. **Tocca il termometro** per vedere il report completo, **copiarlo per un'IA**, **salvarlo in PDF** o **condividerlo**.
 6. **Ogni settimana** un report viene salvato in **Report**. Hai corretto un giorno dopo? Rigenera il report con un tocco.
@@ -33,7 +33,7 @@ EatMate parla **portoghese, inglese, spagnolo, tedesco, francese e italiano**. S
 
 ## 🔒 I tuoi dati restano tuoi
 
-Nessuna registrazione, nessun server, niente pubblicità né tracciamento. Tutto resta **solo sul tuo dispositivo**. Cambi telefono? Usa **Profilo → Esporta backup** e poi **Ripristina backup** sul nuovo telefono.
+Nessuna registrazione, nessun server, niente pubblicità né tracciamento. Tutto resta **solo sul tuo dispositivo**. Cambi telefono? Usa **Profilo → Esporta backup** e poi **Ripristina un backup** sul nuovo telefono.
 
 > ⚠️ I voti sono stime per aiutarti a notare le abitudini. EatMate non sostituisce il parere di un nutrizionista.
 
