@@ -94,7 +94,8 @@ export const it: Messages = {
   classify: {
     title: (name: string) => `Che cos'è “${name}”?`,
     description: 'Scegli la categoria più adatta. EatMate se ne ricorderà la prossima volta.',
-    done: (name: string, category: string) => `“${name}” classificato come ${category}.`,
+    done: (name: string, category: string) =>
+      `“${name}” classificato come ${category.toLowerCase()}.`,
     options: {
       fruta: { label: 'Frutta', examples: 'banana, mela, arancia' },
       verdura: { label: 'Verdura o ortaggio', examples: 'insalata, carota, zucchina' },

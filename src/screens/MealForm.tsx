@@ -182,7 +182,7 @@ function MealForm({ initial, editing }: { initial: Draft; editing: boolean }) {
       ),
     }));
     setClassifying(null);
-    toast(t.classify.done(name, t.classify.options[option.key].label.toLowerCase()));
+    toast(t.classify.done(name, t.classify.options[option.key].label));
   };
 
   const save = async () => {

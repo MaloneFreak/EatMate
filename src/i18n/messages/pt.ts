@@ -97,7 +97,8 @@ export const pt = {
   classify: {
     title: (name: string) => `O que é “${name}”?`,
     description: 'Escolha a categoria que mais combina. O EatMate vai lembrar da próxima vez.',
-    done: (name: string, category: string) => `“${name}” classificado como ${category}.`,
+    done: (name: string, category: string) =>
+      `“${name}” classificado como ${category.toLowerCase()}.`,
     options: {
       fruta: { label: 'Fruta', examples: 'banana, maçã, manga' },
       verdura: { label: 'Verdura ou legume', examples: 'alface, cenoura, abobrinha' },

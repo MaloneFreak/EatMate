@@ -253,7 +253,7 @@ export function ProfileScreen() {
           <ul>
             {(Object.keys(SCORE_WEIGHTS) as ScoreComponentKey[]).map((key) => (
               <li key={key}>
-                {p.method.items[key]} — {SCORE_WEIGHTS[key] * 100}%
+                {p.method.items[key]} — {f.percent(SCORE_WEIGHTS[key])}
               </li>
             ))}
           </ul>

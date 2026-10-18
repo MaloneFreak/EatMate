@@ -21,7 +21,7 @@ Ouvrez simplement le lien sur votre téléphone ou votre ordinateur. **Rien à t
 ## ✍️ Comment ça marche
 
 1. **Indiquez votre prénom.** C’est tout : ni e-mail ni mot de passe.
-2. **Touchez « Enregistrer un repas »** et écrivez ce que vous avez mangé avec vos mots. EatMate sépare les aliments, fait des suggestions pendant la saisie et affiche la note de chacun. Enregistrez tout de suite ou plus tard, pour n’importe quel jour passé.
+2. **Touchez « Ajouter un repas »** et écrivez ce que vous avez mangé avec vos mots. EatMate sépare les aliments, fait des suggestions pendant la saisie et affiche la note de chacun. Enregistrez tout de suite ou plus tard, pour n’importe quel jour passé.
 3. **Une erreur ?** Dans l’**Historique**, vous pouvez modifier ou supprimer chaque repas.
 4. **Après 7 jours**, le **thermomètre** apparaît sur l’écran d’accueil avec votre score (0–100 et A–E).
 5. **Touchez le thermomètre** pour voir le rapport complet, le **copier pour une IA**, l’**enregistrer en PDF** ou le **partager**.

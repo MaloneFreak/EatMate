@@ -64,11 +64,6 @@ const classifyOptions = {
   alcool: { label: 'Alkoholisches Getränk', examples: 'Bier, Wein, Sekt' },
 } satisfies Record<ClassifyKey, { label: string; examples: string }>;
 
-/** A categoria pode chegar em minúsculas; em alemão os substantivos levam maiúscula. */
-const categoryLabel = (category: string) =>
-  Object.values(classifyOptions).find((o) => o.label.toLowerCase() === category.toLowerCase())
-    ?.label ?? category;
-
 export const de: Messages = {
   common: {
     back: 'Zurück',
@@ -145,8 +140,7 @@ export const de: Messages = {
     title: (name: string) => `Was ist „${name}“?`,
     description:
       'Wähl die Kategorie, die am besten passt. EatMate merkt sie sich fürs nächste Mal.',
-    done: (name: string, category: string) =>
-      `„${name}“ als ${categoryLabel(category)} eingeordnet.`,
+    done: (name: string, category: string) => `„${name}“ als ${category} eingeordnet.`,
     options: classifyOptions,
   },
 
@@ -169,7 +163,7 @@ export const de: Messages = {
       regularidade: (s: ScoreFacts, f: Format) =>
         `${f.percent(s.mainMealsShare)} der Hauptmahlzeiten eingetragen (Frühstück, Mittag- und Abendessen)`,
     } satisfies Record<ScoreComponentKey, (s: ScoreFacts, f: Format) => string>,
-    weight: (percent: number) => `Gewichtung ${percent} %`,
+    weight: (percent: number) => `Gewichtung ${percent}\u00a0%`,
     delta: (delta: number) =>
       delta === 0
         ? 'Unverändert gegenüber den 7 Tagen davor'
@@ -214,7 +208,7 @@ export const de: Messages = {
     ultra_high: (n: number, _of: number, f: Format) =>
       `Hochverarbeitete Lebensmittel machten ${f.percent(n)} der Einträge aus. Greif lieber zu unverarbeiteten Lebensmitteln und selbst Gekochtem.`,
     sugary: (n: number) =>
-      `Softdrinks und gesüßte Getränke kamen ${times(n)} vor. Ersetz sie durch Wasser, Mineralwasser mit Zitrone oder frisch gepressten Saft ohne Zucker.`,
+      `Softdrinks und gesüßte Getränke kamen ${times(n)} vor. Ersetze sie durch Wasser, Mineralwasser mit Zitrone oder frisch gepressten Saft ohne Zucker.`,
     sweets: (n: number, of: number) => `Süßes und Naschereien gab es an ${n} von ${of} Tagen.`,
     processed_meat: (n: number) =>
       `Burger und Wurstwaren kamen ${times(n)} vor – sie enthalten oft viel Salz und Konservierungsstoffe.`,
@@ -632,7 +626,7 @@ export const de: Messages = {
     noData: 'nicht genug Daten',
     previous: (period: string) => `Vorheriger Zeitraum (${period})`,
     howCalculated: 'So wurde die Note berechnet',
-    weight: (percent: number) => `Gewichtung ${percent} %`,
+    weight: (percent: number) => `Gewichtung ${percent}\u00a0%`,
     positives: 'Stärken',
     attention: 'Verbesserungspotenzial',
     markers: 'Ernährungsmarker',
