@@ -1,0 +1,506 @@
+/* ============================================================
+   Boas-vindas
+   ============================================================ */
+
+.onboarding {
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+  padding-top: 24px;
+}
+
+.onboarding-hero {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 10px;
+  text-align: center;
+}
+
+.onboarding-hero h1 {
+  font-size: 1.85rem;
+  margin-top: 6px;
+}
+
+.feature-list {
+  list-style: none;
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+.feature {
+  display: flex;
+  gap: 14px;
+  align-items: flex-start;
+}
+
+.feature-icon {
+  display: grid;
+  place-items: center;
+  width: 44px;
+  height: 44px;
+  flex: none;
+  border-radius: 14px;
+  background: var(--primary-soft);
+  color: var(--primary);
+}
+
+.feature-text {
+  display: block;
+  margin-top: 2px;
+}
+
+.privacy-note {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  color: var(--text-muted);
+  font-size: 0.88rem;
+  text-align: center;
+}
+
+/* ============================================================
+   Início
+   ============================================================ */
+
+.greeting {
+  padding: 4px 4px 0;
+}
+
+.greeting h1 {
+  font-size: 1.7rem;
+}
+
+.thermo-card {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.thermo-card .card-title {
+  margin-bottom: 0;
+}
+
+.thermo-body {
+  display: flex;
+  align-items: center;
+  gap: 20px;
+}
+
+.thermo-info {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  min-width: 0;
+}
+
+.hero-score {
+  display: flex;
+  align-items: baseline;
+  gap: 4px;
+  line-height: 1;
+}
+
+.hero-number {
+  font-size: 3.25rem;
+  font-weight: 900;
+  letter-spacing: -0.03em;
+}
+
+.hero-of {
+  font-size: 1.1rem;
+  font-weight: 800;
+  color: var(--text-muted);
+}
+
+.thermo-label {
+  font-size: 0.92rem;
+  color: var(--text-muted);
+}
+
+.thermo-label strong {
+  color: var(--text);
+}
+
+.delta {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 0.84rem;
+  font-weight: 700;
+  color: var(--text-muted);
+}
+
+.delta-up svg {
+  color: var(--grade-a);
+}
+
+.delta-down svg {
+  color: var(--grade-e);
+}
+
+.thermo-card.locked {
+  border-style: dashed;
+  border-width: 1.5px;
+  border-color: var(--border-strong);
+}
+
+.lock-icon {
+  display: grid;
+  place-items: center;
+  width: 34px;
+  height: 34px;
+  border-radius: 11px;
+  background: var(--surface-2);
+  color: var(--text-muted);
+}
+
+.progress-dots {
+  display: flex;
+  gap: 6px;
+}
+
+.progress-dots .dot {
+  flex: 1;
+  height: 10px;
+  border-radius: 99px;
+  background: var(--surface-3);
+}
+
+.progress-dots .dot.filled {
+  background: var(--primary);
+}
+
+.today-grid {
+  list-style: none;
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 8px;
+}
+
+.today-slot {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  height: 100%;
+  min-height: 62px;
+  padding: 10px;
+  border-radius: 16px;
+  border: 1.5px dashed var(--border-strong);
+  color: var(--text);
+  text-decoration: none;
+}
+
+.today-slot.done {
+  border-style: solid;
+  border-color: transparent;
+  background: var(--primary-soft);
+}
+
+.today-slot-icon {
+  display: grid;
+  place-items: center;
+  width: 34px;
+  height: 34px;
+  flex: none;
+  border-radius: 11px;
+  background: var(--surface-2);
+  color: var(--text-muted);
+}
+
+.today-slot.done .today-slot-icon {
+  background: var(--surface);
+  color: var(--primary);
+}
+
+.today-slot-text {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+  flex: 1;
+}
+
+.today-slot-label {
+  font-weight: 800;
+  font-size: 0.88rem;
+  line-height: 1.2;
+}
+
+.today-slot-meta {
+  font-size: 0.78rem;
+  color: var(--text-muted);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.today-slot-status {
+  flex: none;
+  color: var(--text-faint);
+}
+
+.today-slot.done .today-slot-status {
+  color: var(--primary);
+}
+
+.tip-card {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  background: var(--accent-soft);
+  border-color: transparent;
+}
+
+.tip-icon {
+  color: var(--accent);
+}
+
+/* ============================================================
+   Registrar refeição
+   ============================================================ */
+
+.when-row {
+  display: flex;
+  gap: 8px;
+}
+
+.when-time {
+  width: 132px;
+  flex: none;
+}
+
+.meal-quality {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-weight: 700;
+  font-size: 0.9rem;
+  color: var(--text-muted);
+}
+
+/* ============================================================
+   Histórico
+   ============================================================ */
+
+.search-field {
+  position: relative;
+  display: block;
+}
+
+.search-field svg {
+  position: absolute;
+  left: 14px;
+  top: 50%;
+  transform: translateY(-50%);
+  color: var(--text-muted);
+}
+
+.search-field .input {
+  padding-left: 42px;
+}
+
+.day-card {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  padding: 14px;
+}
+
+.day-card-date {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  width: 48px;
+  height: 52px;
+  flex: none;
+  border-radius: 14px;
+  background: var(--surface-2);
+  line-height: 1.1;
+}
+
+.day-card-weekday {
+  font-size: 0.72rem;
+  font-weight: 800;
+  text-transform: uppercase;
+  color: var(--text-muted);
+}
+
+.day-card-number {
+  font-size: 1.3rem;
+  font-weight: 900;
+}
+
+.day-card-body {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+}
+
+.day-card-icons {
+  display: flex;
+  gap: 6px;
+  color: var(--primary);
+}
+
+.day-card-items {
+  font-size: 0.85rem;
+  color: var(--text-muted);
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+/* Dia */
+
+.day-summary {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+}
+
+.meal-card {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  padding: 12px 12px 12px 14px;
+}
+
+.meal-card-header {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.meal-card-icon {
+  display: grid;
+  place-items: center;
+  width: 36px;
+  height: 36px;
+  flex: none;
+  border-radius: 12px;
+  background: var(--primary-soft);
+  color: var(--primary);
+}
+
+.meal-card-items {
+  list-style: none;
+  padding-left: 2px;
+}
+
+.meal-card-notes {
+  font-size: 0.9rem;
+  color: var(--text-muted);
+  font-style: italic;
+}
+
+.missing-meal {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 12px 14px;
+  border-radius: var(--radius);
+  border: 1.5px dashed var(--border-strong);
+  color: var(--text-muted);
+  text-decoration: none;
+  font-weight: 700;
+}
+
+.danger-text {
+  color: var(--danger);
+}
+
+/* ============================================================
+   Relatórios (lista)
+   ============================================================ */
+
+.current-report-link {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+}
+
+.current-report-icon {
+  display: grid;
+  place-items: center;
+  width: 44px;
+  height: 44px;
+  flex: none;
+  border-radius: 14px;
+  background: var(--primary-soft);
+  color: var(--primary);
+}
+
+.block {
+  display: block;
+}
+
+.report-card {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  padding: 14px;
+}
+
+.report-card-main {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  color: inherit;
+  text-decoration: none;
+}
+
+.report-card-main .badge {
+  margin-top: 6px;
+}
+
+.report-card-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 6px;
+  flex-wrap: wrap;
+  border-top: 1px solid var(--border);
+  padding-top: 8px;
+}
+
+.custom-report-form {
+  margin-top: 14px;
+}
+
+/* ============================================================
+   Perfil
+   ============================================================ */
+
+.actions-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 8px;
+}
+
+.methodology {
+  margin-top: 12px;
+}
+
+.danger-zone {
+  border-color: color-mix(in srgb, var(--danger) 30%, var(--border));
+}
+
+.app-version {
+  text-align: center;
+  margin-top: 8px;
+}
+
+@media (max-width: 360px) {
+  .actions-grid {
+    grid-template-columns: 1fr;
+  }
+  .hero-number {
+    font-size: 2.8rem;
+  }
+  .thermo-body {
+    gap: 14px;
+  }
+}
