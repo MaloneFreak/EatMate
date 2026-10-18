@@ -1,0 +1,8 @@
+dist
+dev-dist
+coverage
+playwright-report
+test-results
+package-lock.json
+# A base de alimentos fica em formato de tabela (uma linha por alimento), mais fácil de ler e editar.
+src/domain/foods.ts

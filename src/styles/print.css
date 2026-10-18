@@ -1,0 +1,60 @@
+/* Impressão / "Salvar como PDF": só o relatório, em fundo branco. */
+@media print {
+  :root {
+    color-scheme: light;
+    --bg: #ffffff;
+    --surface: #ffffff;
+    --surface-2: #f4f2ec;
+    --surface-3: #e7e2d6;
+    --text: #111;
+    --text-muted: #444;
+    --border: #ddd;
+  }
+
+  body {
+    background: #fff;
+    -webkit-print-color-adjust: exact;
+    print-color-adjust: exact;
+  }
+
+  .bottom-nav,
+  .page-header,
+  .toasts,
+  .report-actions,
+  .report .notice,
+  .report .badge-live,
+  .report > .btn,
+  .report a.btn {
+    display: none !important;
+  }
+
+  .app,
+  .app-main,
+  .app-main.has-nav {
+    max-width: none;
+    padding: 0;
+  }
+
+  .card {
+    box-shadow: none;
+    break-inside: avoid;
+    page-break-inside: avoid;
+  }
+
+  .report .card:has(.diary-day) {
+    break-inside: auto;
+    page-break-inside: auto;
+  }
+
+  .diary-day {
+    break-inside: avoid;
+  }
+
+  .scale-cell {
+    opacity: 1;
+  }
+
+  @page {
+    margin: 14mm;
+  }
+}

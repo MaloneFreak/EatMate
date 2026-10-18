@@ -1,0 +1,129 @@
+import { describe, expect, it } from 'vitest';
+import { FoodIndex } from './foodIndex';
+import { parseFoodText, splitTyping } from './parser';
+
+const index = new FoodIndex();
+const parse = (text: string) =>
+  parseFoodText(text, index).map((i) => ({ name: i.name, foodId: i.foodId, quantity: i.quantity }));
+const names = (text: string) => parseFoodText(text, index).map((i) => i.name);
+
+describe('parseFoodText', () => {
+  it('entende frases do dia a dia', () => {
+    expect(names('tomei café e comi torradas')).toEqual(['Café', 'Torrada']);
+    expect(names('Tomei café da manhã com pão e manteiga')).toEqual(['Pão', 'Manteiga']);
+    expect(names('arroz, feijão, bife e salada')).toEqual(['Arroz', 'Feijão', 'Bife', 'Salada']);
+  });
+
+  it('reconhece nomes compostos antes das palavras isoladas', () => {
+    expect(parse('café com leite')).toEqual([
+      { name: 'Café com leite', foodId: 'cafe_com_leite', quantity: undefined },
+    ]);
+    expect(names('pão de queijo')).toEqual(['Pão de queijo']);
+    expect(names('batata doce e batata frita')).toEqual(['Batata-doce', 'Batata frita']);
+    expect(names('arroz integral')).toEqual(['Arroz integral']);
+    expect(names('romeu e julieta')).toEqual(['Romeu e julieta']);
+  });
+
+  it('ignora acentos, maiúsculas e plural', () => {
+    expect(parse('PAES')[0]?.foodId).toBe('pao_frances');
+    expect(parse('ovos mexidos')[0]?.foodId).toBe('ovo_mexido');
+    expect(parse('limoes')[0]?.foodId).toBe('limao');
+    expect(parse('2 pães franceses')).toEqual([
+      { name: 'Pão francês', foodId: 'pao_frances', quantity: '2' },
+    ]);
+    expect(parse('pastéis')[0]?.foodId).toBe('pastel');
+  });
+
+  it('extrai quantidades', () => {
+    expect(parse('2 fatias de pão integral com requeijão')).toEqual([
+      { name: 'Pão integral', foodId: 'pao_integral', quantity: '2 fatias' },
+      { name: 'Requeijão', foodId: 'requeijao', quantity: undefined },
+    ]);
+    expect(parse('um copo de suco de laranja')[0]).toEqual({
+      name: 'Suco de laranja',
+      foodId: 'suco_natural',
+      quantity: '1 copo',
+    });
+    expect(parse('meia xícara de aveia')[0]?.quantity).toBe('meia xícara');
+    expect(parse('1 colher de sopa de azeite')[0]).toEqual({
+      name: 'Azeite',
+      foodId: 'azeite',
+      quantity: '1 colher de sopa',
+    });
+    expect(parse('arroz 100g')[0]?.quantity).toBe('100 g');
+    expect(parse('1,5 copo de leite')[0]?.quantity).toBe('1,5 copo');
+    expect(parse('um pouco de arroz')[0]).toEqual({
+      name: 'Arroz',
+      foodId: 'arroz',
+      quantity: undefined,
+    });
+  });
+
+  it('junta complementos com "de" em alimentos que descrevem sabor', () => {
+    expect(parse('bolo de cenoura')).toEqual([
+      { name: 'Bolo de cenoura', foodId: 'bolo', quantity: undefined },
+    ]);
+    expect(names('suco de acerola e pizza de calabresa')).toEqual([
+      'Suco de acerola',
+      'Pizza de calabresa',
+    ]);
+    expect(names('chá de camomila')).toEqual(['Chá de camomila']);
+    expect(names('suco de limao')).toEqual(['Suco de limão']);
+    expect(names('sorvete de chocolate com calda')).toEqual(['Sorvete de chocolate', 'Calda']);
+  });
+
+  it('separa "café da manhã" (refeição) de "café" (bebida)', () => {
+    expect(names('no café da manhã comi tapioca')).toEqual(['Tapioca']);
+    expect(names('café da tarde: café e bolo')).toEqual(['Café', 'Bolo']);
+  });
+
+  it('mantém detalhes ditos logo depois do alimento', () => {
+    expect(names('frango temperado')).toEqual(['Frango temperado']);
+    expect(names('arroz bem soltinho e feijão')).toEqual(['Arroz', 'Feijão']);
+  });
+
+  it('cria itens sem classificação para o que não conhece', () => {
+    expect(parse('comi xpto e arroz')).toEqual([
+      { name: 'Xpto', foodId: undefined, quantity: undefined },
+      { name: 'Arroz', foodId: 'arroz', quantity: undefined },
+    ]);
+    expect(parse('2 coisas estranhas')).toEqual([
+      { name: 'Coisas estranhas', foodId: undefined, quantity: '2' },
+    ]);
+    expect(names('comi qualquercoisa, fruta')).toEqual(['Qualquercoisa', 'Fruta']);
+  });
+
+  it('não cria itens só com palavras de ligação', () => {
+    expect(parse('almoço')).toEqual([]);
+    expect(parse('comi um pouco')).toEqual([]);
+    expect(parse('')).toEqual([]);
+  });
+
+  it('usa os nomes populares', () => {
+    expect(parse('x-tudo com fritas e coca')).toEqual([
+      { name: 'X-tudo', foodId: 'hamburguer', quantity: undefined },
+      { name: 'Fritas', foodId: 'batata_frita', quantity: undefined },
+      { name: 'Coca', foodId: 'refrigerante', quantity: undefined },
+    ]);
+    expect(parse('coca zero')[0]?.foodId).toBe('refrigerante_zero');
+    expect(parse('miojo')[0]?.foodId).toBe('miojo');
+  });
+});
+
+describe('splitTyping', () => {
+  it('isola o alimento que está sendo digitado', () => {
+    expect(splitTyping('arroz, fei')).toEqual({ done: 'arroz,', leading: '', query: 'fei' });
+    expect(splitTyping('pão com mant')).toEqual({ done: 'pão com ', leading: '', query: 'mant' });
+    expect(splitTyping('tomei café e comi torr')).toEqual({
+      done: 'tomei café e ',
+      leading: 'comi',
+      query: 'torr',
+    });
+    expect(splitTyping('2 fatias de pã')).toEqual({
+      done: '',
+      leading: '2 fatias de',
+      query: 'pã',
+    });
+    expect(splitTyping('banana')).toEqual({ done: '', leading: '', query: 'banana' });
+  });
+});

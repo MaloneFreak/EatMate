@@ -1,0 +1,18 @@
+/** Logotipo do EatMate (prato com uma folha). */
+export function Logo({ size = 56, className }: { size?: number; className?: string }) {
+  return (
+    <svg className={className} width={size} height={size} viewBox="0 0 64 64" aria-hidden="true">
+      <rect width="64" height="64" rx="18" fill="#1e7a52" />
+      <circle cx="31" cy="36" r="18" fill="#ffffff" />
+      <circle cx="31" cy="36" r="11.5" fill="#e2f1e8" />
+      <path d="M44 9c-8.5 0-14 5.5-14 13.5 8.5 0 14-5.5 14-13.5z" fill="#85bb2f" />
+      <path
+        d="M30.5 22.5c3-4 7-7 11-9"
+        stroke="#1e7a52"
+        strokeWidth="2"
+        strokeLinecap="round"
+        fill="none"
+      />
+    </svg>
+  );
+}
