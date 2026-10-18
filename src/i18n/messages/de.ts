@@ -361,7 +361,7 @@ export const de: Messages = {
     save: 'Mahlzeit speichern',
     changesSaved: 'Änderungen gespeichert!',
     saved: (meal: string) => `${meal} eingetragen!`,
-    saveError: 'Die Mahlzeit konnte nicht gespeichert werden. Trag sie bitte noch mal ein.',
+    saveError: 'Speichern hat nicht geklappt. Versuch es noch mal.',
     deleteError: 'Die Mahlzeit konnte nicht gelöscht werden. Versuch es noch mal.',
     deleteTitle: 'Diese Mahlzeit löschen?',
     deleteMessage: (meal: string, date: string) =>

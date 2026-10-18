@@ -185,32 +185,32 @@ function MealForm({ initial, editing }: { initial: Draft; editing: boolean }) {
     toast(t.classify.done(name, t.classify.options[option.key].label));
   };
 
-  // Volta para a tela anterior na hora e avisa quando a gravação terminar: em alguns
-  // navegadores (Safari no iPhone) o banco local pode demorar a confirmar a gravação.
-  const save = () => {
+  // Só sai do formulário com a gravação garantida: `saveMeal` grava antes na cópia de
+  // segurança local e não espera o banco por mais que alguns segundos (ver repo.ts).
+  const save = async () => {
     if (!draft.items.length || futureDate || saving) return;
     setSaving(true);
-    const done = editing ? m.changesSaved : m.saved(t.mealTypes[draft.type]);
-    saveMeal({
-      id: draft.id,
-      date: draft.date,
-      type: draft.type,
-      time: draft.time || undefined,
-      notes: draft.notes,
-      items: draft.items.map((i) => ({
-        id: i.id,
-        name: i.name,
-        quantity: i.quantity,
-        foodId: i.foodId,
-      })),
-    }).then(
-      () => toast(done),
-      (error: unknown) => {
-        console.error(error);
-        toast(m.saveError, 'error');
-      },
-    );
-    goBack();
+    try {
+      await saveMeal({
+        id: draft.id,
+        date: draft.date,
+        type: draft.type,
+        time: draft.time || undefined,
+        notes: draft.notes,
+        items: draft.items.map((i) => ({
+          id: i.id,
+          name: i.name,
+          quantity: i.quantity,
+          foodId: i.foodId,
+        })),
+      });
+      toast(editing ? m.changesSaved : m.saved(t.mealTypes[draft.type]));
+      goBack();
+    } catch (error) {
+      console.error(error);
+      toast(m.saveError, 'error');
+      setSaving(false);
+    }
   };
 
   const remove = async () => {
@@ -222,14 +222,14 @@ function MealForm({ initial, editing }: { initial: Draft; editing: boolean }) {
       danger: true,
     });
     if (!ok) return;
-    deleteMeal(draft.id).then(
-      () => toast(m.deleted),
-      (error: unknown) => {
-        console.error(error);
-        toast(m.deleteError, 'error');
-      },
-    );
-    goBack();
+    try {
+      await deleteMeal(draft.id);
+      toast(m.deleted);
+      goBack();
+    } catch (error) {
+      console.error(error);
+      toast(m.deleteError, 'error');
+    }
   };
 
   return (

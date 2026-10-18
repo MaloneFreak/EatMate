@@ -1,12 +1,12 @@
 import { useLiveQuery } from 'dexie-react-hooks';
-import { createContext, useContext, useMemo, type ReactNode } from 'react';
+import { createContext, useContext, useEffect, useMemo, type ReactNode } from 'react';
 import { FoodIndex } from '../domain/foodIndex';
 import { sortMeals } from '../domain/meals';
 import { registeredDates } from '../domain/periods';
 import type { AppSettings, CustomFood, Meal, Profile, SavedReport } from '../domain/types';
 import { useI18n } from '../i18n/I18nProvider';
 import { db } from './db';
-import { getProfile, getSettings } from './repo';
+import { getProfile, getSettings, requestPersistentStorage, syncWithMirror } from './repo';
 
 export interface AppData {
   /** `undefined` enquanto carrega; `null` se a pessoa ainda não se cadastrou. */
@@ -28,6 +28,21 @@ const DataContext = createContext<AppData | null>(null);
 
 /** Carrega os dados do aparelho e mantém tudo atualizado automaticamente. */
 export function DataProvider({ children }: { children: ReactNode }) {
+  // Repõe no banco o que estiver só na cópia de segurança local (ver mirror.ts):
+  // ao abrir o app e sempre que ele volta a aparecer na tela.
+  useEffect(() => {
+    const sync = () => {
+      syncWithMirror().catch((error) => console.error('Erro ao conferir a cópia local', error));
+    };
+    sync();
+    void requestPersistentStorage();
+    const onVisible = () => {
+      if (document.visibilityState === 'visible') sync();
+    };
+    document.addEventListener('visibilitychange', onVisible);
+    return () => document.removeEventListener('visibilitychange', onVisible);
+  }, []);
+
   const profile = useLiveQuery(async () => (await getProfile()) ?? null, []);
   const settings = useLiveQuery(() => getSettings(), []);
   const meals = useLiveQuery(async () => sortMeals(await db.meals.toArray()), []);

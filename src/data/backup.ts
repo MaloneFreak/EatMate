@@ -4,6 +4,7 @@ import { isFoodGroup } from '../domain/groups';
 import { isMealType } from '../domain/meals';
 import type { AppSettings, CustomFood, Meal, Profile, SavedReport } from '../domain/types';
 import { db, uid } from './db';
+import { mirrorSaveFoods, mirrorSaveMeals, mirrorSaveProfile, readMirror } from './mirror';
 import { getProfile, getSettings, migrateReports, updateSettings } from './repo';
 
 export interface BackupFile {
@@ -221,6 +222,26 @@ export function parseBackup(text: string): BackupFile {
  * Registros com o mesmo identificador são substituídos pela versão do backup.
  */
 export async function importBackup(backup: BackupFile): Promise<ImportSummary> {
+  // Primeiro na cópia de segurança local (ver mirror.ts), depois no banco.
+  const undoMeals = mirrorSaveMeals(backup.meals);
+  const undoFoods = mirrorSaveFoods(backup.customFoods);
+  if (backup.profile && !readMirror().profile) mirrorSaveProfile(backup.profile);
+  try {
+    await importIntoDb(backup);
+  } catch (error) {
+    undoMeals();
+    undoFoods();
+    throw error;
+  }
+  await migrateReports();
+  return {
+    meals: backup.meals.length,
+    customFoods: backup.customFoods.length,
+    reports: backup.reports.length,
+  };
+}
+
+async function importIntoDb(backup: BackupFile): Promise<void> {
   await db.transaction('rw', [db.meals, db.reports, db.customFoods, db.kv], async () => {
     await db.meals.bulkPut(backup.meals);
     await db.customFoods.bulkPut(backup.customFoods);
@@ -236,12 +257,6 @@ export async function importBackup(backup: BackupFile): Promise<ImportSummary> {
       ],
     });
   });
-  await migrateReports();
-  return {
-    meals: backup.meals.length,
-    customFoods: backup.customFoods.length,
-    reports: backup.reports.length,
-  };
 }
 
 export async function markBackupDone(): Promise<void> {

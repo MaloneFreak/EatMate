@@ -342,7 +342,7 @@ export const it: Messages = {
     save: 'Salva pasto',
     changesSaved: 'Modifiche salvate!',
     saved: (meal: string) => `Pasto registrato: ${meal}.`,
-    saveError: 'Impossibile salvare il pasto. Registralo di nuovo.',
+    saveError: 'Impossibile salvare. Riprova.',
     deleteError: 'Impossibile eliminare il pasto. Riprova.',
     deleteTitle: 'Eliminare questo pasto?',
     deleteMessage: (meal: string, date: string) =>

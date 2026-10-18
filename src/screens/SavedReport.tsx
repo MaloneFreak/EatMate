@@ -56,15 +56,14 @@ export function SavedReportScreen() {
       danger: true,
     });
     if (!ok) return;
-    // Sai da tela na hora; o aviso aparece quando a exclusão terminar (ver MealForm).
-    deleteReport(report.id).then(
-      () => toast(r.deleted),
-      (error: unknown) => {
-        console.error(error);
-        toast(r.deleteError, 'error');
-      },
-    );
-    void navigate('/relatorios', { replace: true });
+    try {
+      await deleteReport(report.id);
+      toast(r.deleted);
+      void navigate('/relatorios', { replace: true });
+    } catch (error) {
+      console.error(error);
+      toast(r.deleteError, 'error');
+    }
   };
 
   return (
