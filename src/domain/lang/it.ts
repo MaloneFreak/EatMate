@@ -41,7 +41,7 @@ export const it: LanguageRules = {
     'pinte', 'piatto', 'piatti', 'ciotola', 'ciotole', 'scodella', 'scodelle', 'cucchiaio', 'cucchiai',
     'cucchiaino', 'cucchiaini', 'mestolo', 'mestoli', 'misurino', 'misurini', 'lattina', 'lattine',
     'bottiglia', 'bottiglie', 'porzione', 'porzioni', 'manciata', 'manciate', 'pallina', 'palline',
-    'barretta', 'barrette', 'tavoletta', 'tavolette', 'vasetto', 'vasetti', 'vaschetta', 'vaschette',
+    'tavoletta', 'tavolette', 'vasetto', 'vasetti', 'vaschetta', 'vaschette',
     'confezione', 'confezioni', 'pacchetto', 'pacchetti', 'busta', 'buste', 'bustina', 'bustine',
     'scatola', 'scatole', 'scatoletta', 'scatolette', 'trancio', 'tranci', 'spicchio', 'spicchi', 'foglia',
     'foglie', 'filo', 'goccio', 'goccia', 'gocce', 'zolletta', 'zollette', 'g', 'gr', 'grammi', 'grammo',

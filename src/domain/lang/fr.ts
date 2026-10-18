@@ -18,15 +18,22 @@ export const fr: LanguageRules = {
     'fait', 'eu', 'est', 'etait', 'suis', 'c', 'il', 'elle', 'on', 'nous', 'me', 'm', 'moi', 'chez',
     'aujourd', 'hui', 'hier', 'matin', 'midi', 'soir', 'heure', 'apres', 'avant', 'vers', 'pendant',
     'petit', 'dejeuner', 'dej', 'diner', 'gouter', 'souper', 'brunch', 'lunch', 'dessert', 'collation',
-    'encas', 'repas', 'menu', 'entree', 'plat', 'apero', 'aperitif', 'restaurant', 'resto', 'cantine',
+    'encas', 'repas', 'menu', 'entree', 'apero', 'aperitif', 'restaurant', 'resto', 'cantine', 'h',
+    // começam nomes de alimentos ("barre de céréales", "plat du jour"), então não podem ser unidades
+    'barre', 'plat',
     // artigos, preposições e afins
     'le', 'la', 'les', 'l', 'des', 'du', 'de', 'd', 'au', 'aux', 'a', 'en', 'pour', 'ce', 'cet', 'cette',
     'mon', 'ma', 'mes', 'comme', 'sans', 'y', 'un', 'une', 'quelques', 'plusieurs',
     // intensidade e tamanho
     'puis', 'ensuite', 'enfin', 'aussi', 'encore', 'peu', 'beaucoup', 'tres', 'trop', 'juste', 'seulement',
-    'environ', 'moitie', 'barre', 'petite', 'grand', 'grande', 'gros', 'grosse',
+    'environ', 'moitie', 'petite', 'grand', 'grande', 'gros', 'grosse',
   ],
-  stopPhrases: ['p tit dej', 'p tit dejeuner', 'ptit dej', 'ptit dejeuner'],
+  stopPhrases: [
+    'p tit dej', 'p tit dejeuner', 'ptit dej', 'ptit dejeuner',
+    // "mais" (conjunção) vira "maïs" sem acento: "des pâtes mais pas de fromage"
+    ...['pas', 'plus', 'sans', 'aussi', 'seulement', 'juste', 'j', 'je', 'on', 'il', 'elle', 'c', 'pour',
+      'avec', 'que', 'un', 'une', 'des', 'du', 'de', 'd', 'le', 'la', 'les'].map((w) => `mais ${w}`),
+  ],
   numberWords: {
     un: '1', une: '1', deux: '2', trois: '3', quatre: '4', cinq: '5', six: '6', sept: '7', huit: '8',
     neuf: '9', dix: '10', douze: '12', demi: '', demie: '',

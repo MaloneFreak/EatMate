@@ -1,5 +1,6 @@
 import { describe, expect, it } from 'vitest';
 import { FoodIndex } from './foodIndex';
+import type { Language } from './language';
 import { parseFoodText, splitTyping } from './parser';
 
 const index = new FoodIndex();
@@ -181,5 +182,24 @@ describe('palavras compostas em alemão', () => {
     expect(de.lookup('Kuchen')?.food.id).toBe('bolo');
     expect(item?.foodId).toBe('bolo');
     expect(item?.name).toBe('Kirschkuchen');
+  });
+});
+
+describe('complementos e unidades em outros idiomas', () => {
+  const parseIn = (language: Language, text: string) =>
+    parseFoodText(text, new FoodIndex([], language)).map((i) => [i.name, i.foodId, i.quantity]);
+
+  it('mantém o plural e o apóstrofo do complemento', () => {
+    expect(parseIn('fr', 'gâteau aux carottes')).toEqual([
+      ['Gâteau aux carottes', 'bolo', undefined],
+    ]);
+    expect(parseIn('it', "una fetta di torta all'arancia")).toEqual([
+      ["Torta all'arancia", 'bolo', '1 fetta'],
+    ]);
+    expect(parseIn('pt', 'suco de limao')).toEqual([['Suco de limão', 'suco_natural', undefined]]);
+  });
+
+  it('não trata como unidade o começo do nome de um alimento', () => {
+    expect(parseIn('fr', 'un pot-au-feu')[0]?.[0]).toBe('Pot-au-feu');
   });
 });

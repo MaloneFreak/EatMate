@@ -15,6 +15,8 @@ interface Token {
   norm: string;
   key: string;
   isNumber: boolean;
+  /** Seguido de apóstrofo: "d'" em "jus d'orange", "all'" em "torta all'arancia". */
+  elided?: boolean;
 }
 
 interface Compiled {
@@ -63,20 +65,24 @@ function compile(language: Language): Compiled {
 
 function tokenizeRaw(segment: string, c: Compiled): Token[] {
   const out: Token[] = [];
-  for (const raw of segment.match(TOKEN_RE) ?? []) {
+  for (const match of segment.matchAll(TOKEN_RE)) {
+    const raw = match[0];
     if (/^\d/.test(raw)) {
       out.push({ raw, norm: raw, key: raw, isNumber: /^\d+(?:[.,/]\d+)?$/.test(raw) });
       continue;
     }
+    const elided = /['’]/.test(segment.charAt(match.index + raw.length));
     const normalized = normalize(raw);
-    for (const norm of normalized.split(' ').filter(Boolean)) {
+    const parts = normalized.split(' ').filter(Boolean);
+    parts.forEach((norm, i) => {
       out.push({
         raw: norm === normalized ? raw : norm,
         norm,
         key: c.rules.singularize(norm),
         isNumber: false,
+        ...(elided && i === parts.length - 1 ? { elided } : {}),
       });
-    }
+    });
   }
   return out;
 }
@@ -96,7 +102,13 @@ interface QuantityMatch {
 }
 
 /** Lê uma quantidade: "2", "2 fatias de", "meia xícara de", "a cup of", "eine Tasse", "100 g". */
-function quantityAt(tokens: Token[], i: number, c: Compiled): QuantityMatch | undefined {
+function quantityAt(
+  tokens: Token[],
+  keys: string[],
+  i: number,
+  index: FoodIndex,
+  c: Compiled,
+): QuantityMatch | undefined {
   const first = tokens[i];
   if (!first) return undefined;
   const word = first.isNumber ? undefined : c.rules.numberWords[first.norm];
@@ -105,7 +117,9 @@ function quantityAt(tokens: Token[], i: number, c: Compiled): QuantityMatch | un
 
   let end = i + 1;
   const unit = tokens[end];
-  if (unit && !unit.isNumber && (c.units.has(unit.norm) || c.units.has(unit.key))) {
+  // A unidade não pode ser o começo do nome de um alimento ("un pot-au-feu", "un carré frais").
+  const startsFood = (index.matchAt(keys, end)?.length ?? 0) > 1;
+  if (unit && !unit.isNumber && !startsFood && (c.units.has(unit.norm) || c.units.has(unit.key))) {
     parts.push(unit.raw.toLowerCase());
     end++;
     // "colher de sopa", "cuillère à soupe"
@@ -144,12 +158,13 @@ function absorbAt(tokens: Token[], start: number, index: FoodIndex, c: Compiled)
     k--;
   }
   if (!words.some((w) => !c.ofWords.has(w.norm))) return undefined;
-  // Usa a grafia da base quando possível ("limao" → "limão").
+  // Usa a grafia da base para corrigir acentos ("limao" → "limão"), mas mantém o
+  // que foi digitado quando muda algo além disso ("aux carottes" continua no plural).
+  const typed = words.map((w) => w.raw.toLowerCase()).join(' ');
   const known = index.lookupKey(words.map((w) => w.key).join(' '));
-  const complement = known
-    ? known.text.toLowerCase()
-    : words.map((w) => w.raw.toLowerCase()).join(' ');
-  return { text: `${of.raw.toLowerCase()} ${complement}`, end: k };
+  const complement =
+    known && normalize(known.text) === normalize(typed) ? known.text.toLowerCase() : typed;
+  return { text: `${of.raw.toLowerCase()}${of.elided ? "'" : ' '}${complement}`, end: k };
 }
 
 function parseSegment(segment: string, index: FoodIndex, c: Compiled): ParsedItem[] {
@@ -275,7 +290,7 @@ function parseSegment(segment: string, index: FoodIndex, c: Compiled): ParsedIte
       continue;
     }
 
-    const quantity = quantityAt(tokens, i, c);
+    const quantity = quantityAt(tokens, keys, i, index, c);
     if (quantity) {
       const atEnd = quantity.end >= tokens.length || c.separators.has(tokens[quantity.end]!.norm);
       if (last && !separatorSinceLast && !last.item.quantity && atEnd && !run.length) {
