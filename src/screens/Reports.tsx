@@ -9,10 +9,10 @@ import { PageHeader } from '../components/PageHeader';
 import { useToast } from '../components/Toast';
 import { useData } from '../data/DataProvider';
 import { deleteReport, isReportStale, regenerateReport, saveReportForPeriod } from '../data/repo';
-import { formatDateTime, formatPeriod, todayISO } from '../domain/dates';
-import { GRADE_LABELS } from '../domain/grades';
+import { todayISO } from '../domain/dates';
 import { UNLOCK_DAYS, periodEndingOn } from '../domain/periods';
 import type { SavedReport } from '../domain/types';
+import { useI18n } from '../i18n/I18nProvider';
 import { reportTitle } from '../lib/reportTitle';
 
 export function ReportsScreen() {
@@ -20,6 +20,8 @@ export function ReportsScreen() {
   const navigate = useNavigate();
   const confirm = useConfirm();
   const toast = useToast();
+  const { t, f } = useI18n();
+  const r = t.reports;
   const unlocked = dates.length >= UNLOCK_DAYS;
   const lastDate = dates[dates.length - 1] ?? todayISO();
   const [customEnd, setCustomEnd] = useState(lastDate);
@@ -29,7 +31,7 @@ export function ReportsScreen() {
     setBusy(report.id);
     try {
       await regenerateReport(report.id);
-      toast(`${reportTitle(report)} gerado novamente com os dados atuais.`);
+      toast(r.regenerated(reportTitle(report, t)));
     } finally {
       setBusy(null);
     }
@@ -37,30 +39,27 @@ export function ReportsScreen() {
 
   const remove = async (report: SavedReport) => {
     const ok = await confirm({
-      title: `Excluir “${reportTitle(report)}”?`,
-      message:
-        report.kind === 'semanal'
-          ? 'Seus registros de refeições continuam salvos. Você pode gerar este relatório de novo quando quiser.'
-          : 'Seus registros de refeições continuam salvos.',
-      confirmLabel: 'Excluir relatório',
+      title: r.deleteTitle(reportTitle(report, t)),
+      message: report.kind === 'semanal' ? r.deleteWeekly : r.deleteCustom,
+      confirmLabel: r.deleteLabel,
       danger: true,
     });
     if (!ok) return;
     await deleteReport(report.id);
-    toast('Relatório excluído.');
+    toast(r.deleted);
   };
 
   const generateCustom = async (event: FormEvent) => {
     event.preventDefault();
     if (!customEnd) return;
     const report = await saveReportForPeriod(periodEndingOn(customEnd));
-    toast('Relatório gerado.');
+    toast(r.generated);
     navigate(`/relatorios/${report.id}`);
   };
 
   return (
     <div className="stack">
-      <PageHeader title="Relatórios" subtitle="Seu histórico de relatórios semanais" />
+      <PageHeader title={r.title} subtitle={r.subtitle} />
 
       {unlocked ? (
         <Link to="/relatorio" className="card card-link current-report-link">
@@ -68,8 +67,8 @@ export function ReportsScreen() {
             <FileText size={22} aria-hidden="true" />
           </span>
           <span className="grow">
-            <strong>Relatório atual</strong>
-            <span className="muted small block">Últimos 7 dias, atualizado em tempo real</span>
+            <strong>{r.current}</strong>
+            <span className="muted small block">{r.currentText}</span>
           </span>
           <ChevronRight size={20} aria-hidden="true" />
         </Link>
@@ -77,13 +76,10 @@ export function ReportsScreen() {
         <LockedThermometer registeredDays={dates.length} />
       )}
 
-      <p className="muted small">
-        A cada semana encerrada, um relatório é salvo aqui automaticamente. Se você corrigir algum
-        registro depois, é só gerar o relatório novamente.
-      </p>
+      <p className="muted small">{r.info}</p>
 
       {reports.length ? (
-        <ul className="stack-sm" style={{ listStyle: 'none' }} aria-label="Relatórios salvos">
+        <ul className="stack-sm" style={{ listStyle: 'none' }} aria-label={r.list}>
           {reports.map((report) => {
             const stale = isReportStale(report, meals, index);
             const score = report.data.score;
@@ -92,20 +88,20 @@ export function ReportsScreen() {
                 <Link to={`/relatorios/${report.id}`} className="report-card-main">
                   <GradeBadge grade={score?.grade} size="lg" />
                   <span className="grow">
-                    <strong className="block">{reportTitle(report)}</strong>
+                    <strong className="block">{reportTitle(report, t)}</strong>
                     <span className="block small">
-                      {formatPeriod(report.startDate, report.endDate)}
+                      {f.period(report.startDate, report.endDate)}
                       {score && (
                         <span className="muted">
                           {' '}
-                          · {score.total}/100 · {GRADE_LABELS[score.grade]}
+                          · {score.total}/100 · {t.grades.labels[score.grade]}
                         </span>
                       )}
                     </span>
                     <span className="block small muted">
-                      Gerado em {formatDateTime(report.generatedAt)}
+                      {r.generatedAt(f.dateTime(report.generatedAt))}
                     </span>
-                    {stale && <span className="badge badge-warning">Desatualizado</span>}
+                    {stale && <span className="badge badge-warning">{r.stale}</span>}
                   </span>
                 </Link>
                 <div className="report-card-actions">
@@ -115,14 +111,14 @@ export function ReportsScreen() {
                     onClick={() => regenerate(report)}
                     disabled={busy === report.id}
                   >
-                    <RefreshCw size={16} aria-hidden="true" /> Gerar novamente
+                    <RefreshCw size={16} aria-hidden="true" /> {r.regenerate}
                   </button>
                   <button
                     type="button"
                     className="btn btn-sm btn-ghost danger-text"
                     onClick={() => remove(report)}
                   >
-                    <Trash2 size={16} aria-hidden="true" /> Excluir
+                    <Trash2 size={16} aria-hidden="true" /> {r.delete}
                   </button>
                 </div>
               </li>
@@ -130,10 +126,8 @@ export function ReportsScreen() {
           })}
         </ul>
       ) : (
-        <EmptyState icon={<FileText size={30} />} title="Nenhum relatório salvo ainda">
-          {unlocked
-            ? 'O primeiro relatório semanal aparece aqui quando a semana terminar. Você também pode salvar o relatório atual.'
-            : 'Seus relatórios aparecem aqui depois de 7 dias de registros.'}
+        <EmptyState icon={<FileText size={30} />} title={r.emptyTitle}>
+          {unlocked ? r.emptyUnlocked : r.emptyLocked}
         </EmptyState>
       )}
 
@@ -141,12 +135,12 @@ export function ReportsScreen() {
         <details className="card disclosure">
           <summary>
             <span className="row">
-              <FilePlus2 size={20} aria-hidden="true" /> Gerar relatório de outro período
+              <FilePlus2 size={20} aria-hidden="true" /> {r.other}
             </span>
           </summary>
           <form className="stack-sm custom-report-form" onSubmit={generateCustom}>
             <label className="field">
-              <span className="field-label">Último dia do período</span>
+              <span className="field-label">{r.lastDay}</span>
               <input
                 className="input"
                 type="date"
@@ -157,12 +151,12 @@ export function ReportsScreen() {
               />
               <span className="field-hint">
                 {customEnd
-                  ? `O relatório vai cobrir os 7 dias de ${formatPeriod(periodEndingOn(customEnd).start, customEnd)}.`
-                  : 'Escolha uma data.'}
+                  ? r.covers(f.period(periodEndingOn(customEnd).start, customEnd))
+                  : r.pickDate}
               </span>
             </label>
             <button type="submit" className="btn btn-primary">
-              Gerar relatório
+              {r.generate}
             </button>
           </form>
         </details>

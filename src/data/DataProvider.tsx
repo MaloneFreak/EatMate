@@ -4,6 +4,7 @@ import { FoodIndex } from '../domain/foodIndex';
 import { sortMeals } from '../domain/meals';
 import { registeredDates } from '../domain/periods';
 import type { AppSettings, CustomFood, Meal, Profile, SavedReport } from '../domain/types';
+import { useI18n } from '../i18n/I18nProvider';
 import { db } from './db';
 import { getProfile, getSettings } from './repo';
 
@@ -14,7 +15,7 @@ export interface AppData {
   meals: Meal[];
   customFoods: CustomFood[];
   reports: SavedReport[];
-  /** Índice de busca: base do app + alimentos personalizados. */
+  /** Índice de busca: base do app (no idioma escolhido) + alimentos personalizados. */
   index: FoodIndex;
   /** Quantas vezes cada alimento foi registrado (para ordenar sugestões). */
   usage: Map<string, number>;
@@ -39,7 +40,8 @@ export function DataProvider({ children }: { children: ReactNode }) {
     [],
   );
 
-  const index = useMemo(() => new FoodIndex(customFoods ?? []), [customFoods]);
+  const { language } = useI18n();
+  const index = useMemo(() => new FoodIndex(customFoods ?? [], language), [customFoods, language]);
   const usage = useMemo(() => {
     const map = new Map<string, number>();
     for (const meal of meals ?? []) {

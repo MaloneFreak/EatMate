@@ -92,12 +92,28 @@ export type ScoreComponentKey =
 
 export interface ScoreComponent {
   key: ScoreComponentKey;
-  label: string;
   /** Peso do componente na nota final (0–1). */
   weight: number;
   /** Pontuação do componente (0–100). */
   score: number;
-  detail: string;
+}
+
+/** Números que explicam a nota (o texto de cada idioma é montado a partir deles). */
+export interface ScoreFacts {
+  /** Letra equivalente à média das notas dos alimentos. */
+  averageGrade: Grade;
+  /** Parcela (0–1) de itens in natura ou minimamente processados. */
+  inNaturaShare: number;
+  /** Parcela (0–1) de itens ultraprocessados. */
+  ultraShare: number;
+  /** Porções de frutas, verduras e legumes por dia. */
+  fvPerDay: number;
+  fvTarget: number;
+  /** Alimentos diferentes com nota A, B ou C. */
+  distinctGood: number;
+  varietyTarget: number;
+  /** Parcela (0–1) das refeições principais registradas. */
+  mainMealsShare: number;
 }
 
 export interface ScoreResult {
@@ -105,15 +121,59 @@ export interface ScoreResult {
   total: number;
   grade: Grade;
   components: ScoreComponent[];
+  facts: ScoreFacts;
 }
 
+export type MarkerKey =
+  'feijao' | 'frutas' | 'verduras' | 'embutidos' | 'adocadas' | 'salgadinhos' | 'doces';
+
 export interface MarkerResult {
-  key: 'feijao' | 'frutas' | 'verduras' | 'embutidos' | 'adocadas' | 'salgadinhos' | 'doces';
-  label: string;
+  key: MarkerKey;
   /** "bom" = queremos que apareça; "evitar" = queremos que apareça pouco. */
   kind: 'bom' | 'evitar';
   days: number;
   count: number;
+}
+
+export type InsightKey =
+  // pontos positivos
+  | 'fv_great'
+  | 'fv_good'
+  | 'beans_most'
+  | 'few_ultra'
+  | 'no_sugary'
+  | 'regular_meals'
+  | 'breakfast_daily'
+  | 'variety_good'
+  | 'water'
+  | 'whole_grains'
+  | 'in_natura'
+  // pontos de atenção
+  | 'fv_low'
+  | 'fruits_few'
+  | 'vegetables_few'
+  | 'ultra_high'
+  | 'sugary'
+  | 'sweets'
+  | 'processed_meat'
+  | 'salty_snacks'
+  | 'fast_food'
+  | 'alcohol'
+  | 'no_breakfast'
+  | 'skipped_meals'
+  | 'beans_low'
+  | 'variety_low'
+  | 'incomplete'
+  | 'unclassified';
+
+/**
+ * Destaque do relatório. O texto vem das mensagens de cada idioma:
+ * `n` é o valor principal (dias, vezes, porções ou parcela 0–1) e `of`, o total ou a meta.
+ */
+export interface Insight {
+  key: InsightKey;
+  n?: number;
+  of?: number;
 }
 
 export interface ReportDiaryItem {
@@ -139,7 +199,7 @@ export interface ReportDay {
 }
 
 export interface ReportData {
-  /** Versão do algoritmo que gerou o relatório. */
+  /** Versão do formato do relatório (ver `REPORT_VERSION`). */
   version: number;
   profileName: string;
   startDate: string;
@@ -156,9 +216,10 @@ export interface ReportData {
   groups: { group: FoodGroup; count: number; days: number }[];
   markers: MarkerResult[];
   mealRegularity: { type: MealType; days: number }[];
-  topFoods: { name: string; count: number; grade?: Grade }[];
-  positives: string[];
-  attention: string[];
+  /** Sem `foodId`, o item não foi reconhecido e `name` é o texto digitado. */
+  topFoods: { foodId?: string; name: string; count: number; grade?: Grade }[];
+  positives: Insight[];
+  attention: Insight[];
   fruitsAndVegetablesPerDay: number;
   ultraProcessedShare: number;
   distinctFoods: number;

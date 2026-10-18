@@ -1,17 +1,10 @@
 import { CircleAlert, CircleCheck, ThumbsUp, TriangleAlert } from 'lucide-react';
 import type { CSSProperties, ReactNode } from 'react';
-import {
-  capitalize,
-  formatDateTime,
-  formatFull,
-  formatLong,
-  formatShort,
-  formatWeekdayShort,
-} from '../domain/dates';
-import { GRADES, GRADE_LABELS, GRADE_MESSAGES, gradeFromScore } from '../domain/grades';
-import { NOVA_LABELS, groupLabel } from '../domain/groups';
-import { mealLabel } from '../domain/meals';
+import { useData } from '../data/DataProvider';
+import { insightText } from '../domain/exportText';
+import { GRADES, gradeFromScore } from '../domain/grades';
 import type { Grade, MarkerResult, Nova, ReportData } from '../domain/types';
+import { useI18n } from '../i18n/I18nProvider';
 import { GradeBadge } from './GradeBadge';
 import { MealIcon } from './MealIcon';
 import { ScoreDelta } from './ScoreDelta';
@@ -27,7 +20,6 @@ interface ReportViewProps {
   children?: ReactNode;
 }
 
-const decimal = (value: number) => value.toLocaleString('pt-BR', { maximumFractionDigits: 1 });
 const pct = (part: number, total: number) => (total ? Math.round((part / total) * 100) : 0);
 const gradeColor = (grade: Grade) => `var(--grade-${grade.toLowerCase()})`;
 
@@ -46,6 +38,7 @@ const NOVA_TEXT: Record<Nova, string> = {
 
 /** Relatório completo: usado no relatório atual, nos relatórios salvos e no exemplo. */
 export function ReportView({ data, title, badge, generatedAt, children }: ReportViewProps) {
+  const { t } = useI18n();
   return (
     <article className="report stack" aria-label={title}>
       <ReportHero data={data} title={title} badge={badge} generatedAt={generatedAt} />
@@ -60,16 +53,13 @@ export function ReportView({ data, title, badge, generatedAt, children }: Report
       {data.topFoods.length > 0 && <TopFoods data={data} />}
       <DayByDay data={data} />
       <Diary data={data} />
-      <p className="report-footnote">
-        As notas de A a E e o grau de processamento são estimativas automáticas, inspiradas no
-        Nutri-Score e no Guia Alimentar para a População Brasileira. Este relatório não substitui a
-        orientação de um(a) nutricionista.
-      </p>
+      <p className="report-footnote">{t.report.footnote}</p>
     </article>
   );
 }
 
 function ReportHero({ data, title, badge, generatedAt }: Omit<ReportViewProps, 'children'>) {
+  const { t, f } = useI18n();
   const score = data.score;
   return (
     <section className="card report-hero">
@@ -77,10 +67,12 @@ function ReportHero({ data, title, badge, generatedAt }: Omit<ReportViewProps, '
         <div>
           <h2>{title}</h2>
           <p className="muted small">
-            {formatFull(data.startDate)} a {formatFull(data.endDate)}
+            {f.periodFull(data.startDate, data.endDate)}
             {data.profileName && ` · ${data.profileName}`}
           </p>
-          {generatedAt && <p className="muted small">Gerado em {formatDateTime(generatedAt)}</p>}
+          {generatedAt && (
+            <p className="muted small">{t.report.generatedAt(f.dateTime(generatedAt))}</p>
+          )}
         </div>
         {badge}
       </div>
@@ -94,57 +86,59 @@ function ReportHero({ data, title, badge, generatedAt }: Omit<ReportViewProps, '
             </p>
             <ScoreScale grade={score.grade} size="lg" />
             <p>
-              <strong>{GRADE_LABELS[score.grade]}.</strong> {GRADE_MESSAGES[score.grade]}
+              <strong>{t.grades.labels[score.grade]}.</strong> {t.grades.messages[score.grade]}
             </p>
             {data.previous && <ScoreDelta current={score.total} previous={data.previous.score} />}
           </div>
         </div>
       ) : (
-        <p className="muted">
-          Não há alimentos reconhecidos suficientes neste período para calcular a nota.
-        </p>
+        <p className="muted">{t.report.noScore}</p>
       )}
     </section>
   );
 }
 
 function ReportStats({ data }: { data: ReportData }) {
+  const { t, f } = useI18n();
   return (
     <div className="kpis kpis-4">
       <div className="kpi">
         <div className="kpi-value">
           {data.registeredDays}/{data.totalDays}
         </div>
-        <div className="kpi-label">dias registrados</div>
+        <div className="kpi-label">{t.report.kpis.days}</div>
       </div>
       <div className="kpi">
         <div className="kpi-value">{data.mealsCount}</div>
-        <div className="kpi-label">refeições</div>
+        <div className="kpi-label">{t.report.kpis.meals}</div>
       </div>
       <div className="kpi">
-        <div className="kpi-value">{decimal(data.fruitsAndVegetablesPerDay)}</div>
-        <div className="kpi-label">porções de frutas e verduras por dia</div>
+        <div className="kpi-value">{f.decimal(data.fruitsAndVegetablesPerDay)}</div>
+        <div className="kpi-label">{t.report.kpis.fruitsAndVegetables}</div>
       </div>
       <div className="kpi">
-        <div className="kpi-value">{Math.round(data.ultraProcessedShare * 100)}%</div>
-        <div className="kpi-label">de ultraprocessados</div>
+        <div className="kpi-value">{f.percent(data.ultraProcessedShare)}</div>
+        <div className="kpi-label">{t.report.kpis.ultraProcessed}</div>
       </div>
     </div>
   );
 }
 
 function Highlights({ data }: { data: ReportData }) {
-  if (!data.positives.length && !data.attention.length) return null;
+  const { t, f } = useI18n();
+  const positives = data.positives.map((i) => insightText(i, t, f)).filter(Boolean);
+  const attention = data.attention.map((i) => insightText(i, t, f)).filter(Boolean);
+  if (!positives.length && !attention.length) return null;
   return (
     <section className="card stack" aria-labelledby="highlights-title">
-      <h2 id="highlights-title">Destaques</h2>
-      {data.positives.length > 0 && (
+      <h2 id="highlights-title">{t.report.highlights}</h2>
+      {positives.length > 0 && (
         <div className="stack-sm">
           <h3 className="highlight-title good">
-            <ThumbsUp size={18} aria-hidden="true" /> Pontos positivos
+            <ThumbsUp size={18} aria-hidden="true" /> {t.report.positives}
           </h3>
           <ul className="highlight-list">
-            {data.positives.map((text) => (
+            {positives.map((text) => (
               <li key={text} className="good">
                 <CircleCheck size={18} aria-hidden="true" />
                 <span>{text}</span>
@@ -153,13 +147,13 @@ function Highlights({ data }: { data: ReportData }) {
           </ul>
         </div>
       )}
-      {data.attention.length > 0 && (
+      {attention.length > 0 && (
         <div className="stack-sm">
           <h3 className="highlight-title warn">
-            <TriangleAlert size={18} aria-hidden="true" /> Pontos de atenção
+            <TriangleAlert size={18} aria-hidden="true" /> {t.report.attention}
           </h3>
           <ul className="highlight-list">
-            {data.attention.map((text) => (
+            {attention.map((text) => (
               <li key={text} className="warn">
                 <CircleAlert size={18} aria-hidden="true" />
                 <span>{text}</span>
@@ -189,27 +183,33 @@ function Meter({ value, color, label }: { value: number; color: string; label: s
 }
 
 function ScoreBreakdown({ data }: { data: ReportData }) {
+  const { t, f } = useI18n();
+  const score = data.score!;
   return (
     <section className="card stack" aria-labelledby="breakdown-title">
       <div>
-        <h2 id="breakdown-title">Como a nota foi calculada</h2>
-        <p className="muted small">Cinco critérios, cada um de 0 a 100, com pesos diferentes.</p>
+        <h2 id="breakdown-title">{t.report.breakdown}</h2>
+        <p className="muted small">{t.report.breakdownText}</p>
       </div>
       <ul className="breakdown">
-        {data.score!.components.map((c) => (
+        {score.components.map((c) => (
           <li key={c.key} className="stack-sm">
             <div className="row-between">
               <span>
-                <strong>{c.label}</strong>{' '}
-                <span className="muted small">· peso {Math.round(c.weight * 100)}%</span>
+                <strong>{t.score.components[c.key]}</strong>{' '}
+                <span className="muted small">· {t.score.weight(Math.round(c.weight * 100))}</span>
               </span>
               <span className="tabular">
                 <strong>{c.score}</strong>
                 <span className="muted small">/100</span>
               </span>
             </div>
-            <Meter value={c.score} color={gradeColor(gradeFromScore(c.score))} label={c.label} />
-            <span className="muted small">{c.detail}</span>
+            <Meter
+              value={c.score}
+              color={gradeColor(gradeFromScore(c.score))}
+              label={t.score.components[c.key]}
+            />
+            <span className="muted small">{t.score.details[c.key](score.facts, f)}</span>
           </li>
         ))}
       </ul>
@@ -226,49 +226,49 @@ function markerStatus(marker: MarkerResult, registeredDays: number): Status {
   return marker.days === 0 ? 'good' : ratio <= 0.3 ? 'warn' : 'bad';
 }
 
-const STATUS_INFO: Record<Status, { label: string; color: string; icon: typeof CircleCheck }> = {
-  good: { label: 'Ótimo', color: 'var(--grade-a)', icon: CircleCheck },
-  warn: { label: 'Pode melhorar', color: 'var(--grade-d)', icon: CircleAlert },
-  bad: { label: 'Atenção', color: 'var(--grade-e)', icon: TriangleAlert },
+const STATUS_INFO: Record<Status, { color: string; icon: typeof CircleCheck }> = {
+  good: { color: 'var(--grade-a)', icon: CircleCheck },
+  warn: { color: 'var(--grade-d)', icon: CircleAlert },
+  bad: { color: 'var(--grade-e)', icon: TriangleAlert },
 };
 
 function Markers({ data }: { data: ReportData }) {
+  const { t } = useI18n();
   return (
     <section className="card stack" aria-labelledby="markers-title">
       <div>
-        <h2 id="markers-title">Marcadores de consumo</h2>
-        <p className="muted small">
-          Em quantos dos {data.registeredDays} dias registrados cada grupo apareceu (inspirado no
-          SISVAN, do Ministério da Saúde).
-        </p>
+        <h2 id="markers-title">{t.report.markers}</h2>
+        <p className="muted small">{t.report.markersText(data.registeredDays)}</p>
       </div>
       {(['bom', 'evitar'] as const).map((kind) => (
         <div key={kind} className="stack-sm">
           <h3 className="small muted">
-            {kind === 'bom' ? 'O ideal é consumir todos os dias' : 'O ideal é evitar'}
+            {kind === 'bom' ? t.report.markersGood : t.report.markersAvoid}
           </h3>
           <ul className="markers">
             {data.markers
               .filter((m) => m.kind === kind)
               .map((m) => {
-                const status = STATUS_INFO[markerStatus(m, data.registeredDays)];
+                const statusKey = markerStatus(m, data.registeredDays);
+                const status = STATUS_INFO[statusKey];
                 const Icon = status.icon;
+                const label = t.markers[m.key] ?? m.key;
                 return (
                   <li key={m.key} className="stack-sm">
                     <div className="row-between">
-                      <span className="grow">{m.label}</span>
+                      <span className="grow">{label}</span>
                       <span className="marker-status">
                         <Icon size={16} aria-hidden="true" style={{ color: status.color }} />
-                        {status.label}
+                        {t.report.status[statusKey]}
                       </span>
                     </div>
                     <Meter
                       value={pct(m.days, data.registeredDays)}
                       color={status.color}
-                      label={`${m.label}: ${m.days} de ${data.registeredDays} dias`}
+                      label={`${label}: ${t.common.daysOf(m.days, data.registeredDays)}`}
                     />
                     <span className="muted small">
-                      {m.days} de {data.registeredDays} dias · {m.count}x
+                      {t.common.daysOf(m.days, data.registeredDays)} · {m.count}x
                     </span>
                   </li>
                 );
@@ -329,6 +329,7 @@ function StackedBar({
 }
 
 function Distributions({ data }: { data: ReportData }) {
+  const { t } = useI18n();
   const grades = GRADES.map((g) => ({
     key: g,
     value: data.gradeDistribution[g],
@@ -342,24 +343,28 @@ function Distributions({ data }: { data: ReportData }) {
     value: data.novaDistribution[n],
     color: NOVA_COLORS[n],
     text: NOVA_TEXT[n],
-    label: NOVA_LABELS[n],
+    label: t.nova[n],
     short: String(n),
   }));
   return (
     <section className="card stack" aria-labelledby="dist-title">
-      <h2 id="dist-title">Qualidade e processamento</h2>
+      <h2 id="dist-title">{t.report.distributions}</h2>
       <div className="stack-sm">
-        <h3>Notas dos alimentos (A a E)</h3>
+        <h3>{t.report.gradesTitle}</h3>
         <StackedBar
           segments={grades}
-          label={`Distribuição das notas: ${grades.map((g) => `${g.label} ${pct(g.value, data.classifiedCount)}%`).join(', ')}`}
+          label={t.report.gradesLabel(
+            grades.map((g) => `${g.label} ${pct(g.value, data.classifiedCount)}%`).join(', '),
+          )}
         />
       </div>
       <div className="stack-sm">
-        <h3>Grau de processamento</h3>
+        <h3>{t.report.processingTitle}</h3>
         <StackedBar
           segments={novas}
-          label={`Grau de processamento: ${novas.map((n) => `${n.label} ${pct(n.value, data.classifiedCount)}%`).join(', ')}`}
+          label={t.report.processingLabel(
+            novas.map((n) => `${n.label} ${pct(n.value, data.classifiedCount)}%`).join(', '),
+          )}
         />
       </div>
     </section>
@@ -367,21 +372,22 @@ function Distributions({ data }: { data: ReportData }) {
 }
 
 function Groups({ data }: { data: ReportData }) {
+  const { t } = useI18n();
   return (
     <section className="card stack-sm" aria-labelledby="groups-title">
-      <h2 id="groups-title">Grupos de alimentos</h2>
+      <h2 id="groups-title">{t.report.groups}</h2>
       <table className="report-table">
         <thead>
           <tr>
-            <th scope="col">Grupo</th>
-            <th scope="col">Vezes</th>
-            <th scope="col">Dias</th>
+            <th scope="col">{t.report.group}</th>
+            <th scope="col">{t.report.times}</th>
+            <th scope="col">{t.report.daysColumn}</th>
           </tr>
         </thead>
         <tbody>
           {data.groups.map((g) => (
             <tr key={g.group}>
-              <td>{groupLabel(g.group)}</td>
+              <td>{t.groups[g.group]}</td>
               <td className="tabular">{g.count}</td>
               <td className="tabular">{g.days}</td>
             </tr>
@@ -393,13 +399,12 @@ function Groups({ data }: { data: ReportData }) {
 }
 
 function MealsRegularity({ data }: { data: ReportData }) {
+  const { t } = useI18n();
   return (
     <section className="card stack" aria-labelledby="meals-title">
       <div>
-        <h2 id="meals-title">Refeições</h2>
-        <p className="muted small">
-          Em quantos dos {data.registeredDays} dias registrados cada refeição aparece.
-        </p>
+        <h2 id="meals-title">{t.report.meals}</h2>
+        <p className="muted small">{t.report.mealsText(data.registeredDays)}</p>
       </div>
       <ul className="markers">
         {data.mealRegularity.map((m) => (
@@ -407,16 +412,16 @@ function MealsRegularity({ data }: { data: ReportData }) {
             <div className="row-between">
               <span className="row">
                 <MealIcon type={m.type} size={18} />
-                {mealLabel(m.type)}
+                {t.mealTypes[m.type]}
               </span>
               <span className="tabular small">
-                <strong>{m.days}</strong> de {data.registeredDays}
+                <strong>{m.days}</strong> {t.report.of} {data.registeredDays}
               </span>
             </div>
             <Meter
               value={pct(m.days, data.registeredDays)}
               color="var(--primary)"
-              label={`${mealLabel(m.type)}: ${m.days} dias`}
+              label={t.report.mealDays(t.mealTypes[m.type], m.days)}
             />
           </li>
         ))}
@@ -426,15 +431,17 @@ function MealsRegularity({ data }: { data: ReportData }) {
 }
 
 function TopFoods({ data }: { data: ReportData }) {
+  const { t } = useI18n();
+  const { index } = useData();
   return (
     <section className="card stack-sm" aria-labelledby="top-title">
-      <h2 id="top-title">Alimentos mais frequentes</h2>
+      <h2 id="top-title">{t.report.topFoods}</h2>
       <ol className="top-foods">
-        {data.topFoods.map((f) => (
-          <li key={f.name} className="food-line">
-            <GradeBadge grade={f.grade} />
-            <span className="grow">{f.name}</span>
-            <span className="muted tabular">{f.count}x</span>
+        {data.topFoods.map((food) => (
+          <li key={food.foodId ?? food.name} className="food-line">
+            <GradeBadge grade={food.grade} />
+            <span className="grow">{index.get(food.foodId)?.name ?? food.name}</span>
+            <span className="muted tabular">{food.count}x</span>
           </li>
         ))}
       </ol>
@@ -443,14 +450,15 @@ function TopFoods({ data }: { data: ReportData }) {
 }
 
 function DayByDay({ data }: { data: ReportData }) {
+  const { t, f } = useI18n();
   return (
     <section className="card stack-sm" aria-labelledby="days-title">
-      <h2 id="days-title">Dia a dia</h2>
+      <h2 id="days-title">{t.report.dayByDay}</h2>
       <ul className="day-strip">
         {data.days.map((d) => (
           <li key={d.date} className="day-strip-item">
-            <span className="small muted">{formatWeekdayShort(d.date)}</span>
-            <span className="small">{formatShort(d.date)}</span>
+            <span className="small muted">{f.weekdayShort(d.date)}</span>
+            <span className="small">{f.short(d.date)}</span>
             {d.mealsCount ? (
               <GradeBadge grade={d.grade} size="md" />
             ) : (
@@ -464,18 +472,17 @@ function DayByDay({ data }: { data: ReportData }) {
 }
 
 function Diary({ data }: { data: ReportData }) {
+  const { t, f } = useI18n();
   return (
     <section className="card stack" aria-labelledby="diary-title">
       <div>
-        <h2 id="diary-title">Diário alimentar completo</h2>
-        <p className="muted small">
-          Tudo o que foi registrado no período, para mostrar ao seu nutricionista.
-        </p>
+        <h2 id="diary-title">{t.report.diary}</h2>
+        <p className="muted small">{t.report.diaryText}</p>
       </div>
       {data.days.map((day) => (
         <div key={day.date} className="diary-day">
           <h3 className="row-between">
-            <span>{capitalize(formatLong(day.date))}</span>
+            <span>{f.long(day.date)}</span>
             {day.grade && <GradeBadge grade={day.grade} />}
           </h3>
           {day.meals.length ? (
@@ -483,7 +490,7 @@ function Diary({ data }: { data: ReportData }) {
               {day.meals.map((meal, i) => (
                 <li key={i}>
                   <strong>
-                    {mealLabel(meal.type)}
+                    {t.mealTypes[meal.type]}
                     {meal.time && <span className="muted"> · {meal.time}</span>}
                   </strong>
                   <span>
@@ -495,12 +502,16 @@ function Diary({ data }: { data: ReportData }) {
                       </span>
                     ))}
                   </span>
-                  {meal.notes && <span className="muted small">Obs.: {meal.notes}</span>}
+                  {meal.notes && (
+                    <span className="muted small">
+                      {t.report.notes} {meal.notes}
+                    </span>
+                  )}
                 </li>
               ))}
             </ul>
           ) : (
-            <p className="muted small">Sem registro.</p>
+            <p className="muted small">{t.report.noRecord}</p>
           )}
         </div>
       ))}

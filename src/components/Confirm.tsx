@@ -1,4 +1,5 @@
 import { createContext, useCallback, useContext, useRef, useState, type ReactNode } from 'react';
+import { useI18n } from '../i18n/I18nProvider';
 import { Sheet } from './Sheet';
 
 interface ConfirmOptions {
@@ -15,6 +16,7 @@ const ConfirmContext = createContext<Confirm>(async () => false);
 
 /** Caixa de confirmação ("Tem certeza?") usada antes de excluir algo. */
 export function ConfirmProvider({ children }: { children: ReactNode }) {
+  const { t } = useI18n();
   const [options, setOptions] = useState<ConfirmOptions | null>(null);
   const resolver = useRef<((value: boolean) => void) | null>(null);
 
@@ -45,14 +47,14 @@ export function ConfirmProvider({ children }: { children: ReactNode }) {
       >
         <div className="sheet-actions">
           <button type="button" className="btn btn-secondary" onClick={() => close(false)}>
-            {options?.cancelLabel ?? 'Cancelar'}
+            {options?.cancelLabel ?? t.common.cancel}
           </button>
           <button
             type="button"
             className={`btn ${options?.danger ? 'btn-danger' : 'btn-primary'}`}
             onClick={() => close(true)}
           >
-            {options?.confirmLabel ?? 'Confirmar'}
+            {options?.confirmLabel ?? t.common.confirm}
           </button>
         </div>
       </Sheet>

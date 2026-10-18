@@ -1,0 +1,95 @@
+# Cria uma versão (Release) do EatMate com as notas do CHANGELOG.md.
+# Jeitos de usar: Actions → "Criar versão (Release)" → Run workflow, ou enviar uma tag "v1.2.3".
+name: Criar versão (Release)
+
+on:
+  push:
+    tags: ['v*']
+  workflow_dispatch:
+    inputs:
+      version:
+        description: 'Versão, igual à do package.json (ex.: 1.1.0)'
+        required: true
+
+permissions:
+  contents: write
+
+concurrency:
+  group: release
+  cancel-in-progress: false
+
+jobs:
+  release:
+    name: Testar, gerar e publicar a versão
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-node@v7
+        with:
+          node-version-file: .nvmrc
+          cache: npm
+
+      - name: Conferir a versão
+        id: version
+        env:
+          GH_TOKEN: ${{ github.token }}
+          INPUT_VERSION: ${{ inputs.version }}
+        run: |
+          if [ "$GITHUB_EVENT_NAME" = "push" ]; then
+            VERSION="${GITHUB_REF_NAME#v}"
+          else
+            VERSION="${INPUT_VERSION#v}"
+          fi
+          PACKAGE_VERSION="$(node -p "require('./package.json').version")"
+          if [ "$VERSION" != "$PACKAGE_VERSION" ]; then
+            echo "::error title=Versão diferente do package.json::Pediu a versão $VERSION, mas o package.json está em $PACKAGE_VERSION. Atualize o package.json (e o CHANGELOG.md) primeiro."
+            exit 1
+          fi
+          if ! grep -q "^## \[$VERSION\]" CHANGELOG.md; then
+            echo "::error title=Faltam as notas da versão::Inclua uma seção '## [$VERSION] - AAAA-MM-DD' no CHANGELOG.md."
+            exit 1
+          fi
+          if gh release view "v$VERSION" > /dev/null 2>&1; then
+            echo "::error title=Versão já publicada::A Release v$VERSION já existe."
+            exit 1
+          fi
+          echo "version=$VERSION" >> "$GITHUB_OUTPUT"
+
+      - run: npm ci
+      - run: npm test
+      - run: npm run build
+
+      - name: Montar o pacote e as notas
+        env:
+          VERSION: ${{ steps.version.outputs.version }}
+        run: |
+          (cd dist && zip -qr "../eatmate-web-v$VERSION.zip" .)
+          OWNER="$(echo "${GITHUB_REPOSITORY%%/*}" | tr '[:upper:]' '[:lower:]')"
+          REPO="${GITHUB_REPOSITORY#*/}"
+          {
+            echo "## 👉 [Abrir o EatMate](https://$OWNER.github.io/$REPO/)"
+            echo
+            echo "Não precisa instalar nada: abra o link no celular ou no computador. Para deixar na tela inicial, veja o [README](https://github.com/$GITHUB_REPOSITORY#readme)."
+            echo
+            # Seção desta versão no CHANGELOG.md (até a próxima seção ou os links do fim).
+            awk -v v="$VERSION" '
+              $0 ~ "^## \\[" v "\\]" { found = 1; next }
+              found && (/^## \[/ || /^\[[^]]+\]: /) { exit }
+              found { print }
+            ' CHANGELOG.md
+            echo
+            echo "---"
+            echo "_O arquivo \`eatmate-web-v$VERSION.zip\` é para quem quer hospedar o app em outro site: basta publicar o conteúdo dele em qualquer hospedagem de arquivos estáticos._"
+          } > release-notes.md
+          cat release-notes.md
+
+      - name: Publicar a Release
+        env:
+          GH_TOKEN: ${{ github.token }}
+          VERSION: ${{ steps.version.outputs.version }}
+        run: |
+          gh release create "v$VERSION" "eatmate-web-v$VERSION.zip" \
+            --title "EatMate $VERSION" \
+            --notes-file release-notes.md \
+            --target "$GITHUB_SHA" \
+            --latest

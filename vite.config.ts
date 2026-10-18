@@ -12,8 +12,9 @@ export default defineConfig({
     __APP_VERSION__: JSON.stringify(process.env.npm_package_version ?? 'dev'),
   },
   build: {
-    // React + roteador + banco local ficam num único arquivo (~180 kB comprimido), guardado em cache pelo app.
-    chunkSizeWarningLimit: 800,
+    // React + roteador + banco local + os 6 idiomas ficam num único arquivo (~250 kB comprimido),
+    // guardado em cache pelo app para funcionar sem internet.
+    chunkSizeWarningLimit: 1200,
   },
   plugins: [
     react(),
@@ -22,11 +23,12 @@ export default defineConfig({
       injectRegister: false,
       includeAssets: ['favicon.svg', 'apple-touch-icon.png'],
       manifest: {
-        name: 'EatMate — Diário alimentar',
+        // O app escolhe o idioma da tela sozinho; o manifesto fica em inglês.
+        name: 'EatMate — Food diary',
         short_name: 'EatMate',
         description:
-          'Registre suas refeições, acompanhe a qualidade da sua alimentação e gere relatórios semanais.',
-        lang: 'pt-BR',
+          'Log your meals, follow the quality of your diet and get weekly reports. In Português, English, Español, Deutsch, Français and Italiano.',
+        lang: 'en',
         dir: 'ltr',
         start_url: './',
         scope: './',

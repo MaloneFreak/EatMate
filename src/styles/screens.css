@@ -226,6 +226,9 @@
   font-weight: 800;
   font-size: 0.88rem;
   line-height: 1.2;
+  /* Nomes longos em alguns idiomas ("Nachmittagssnack"). */
+  hyphens: auto;
+  overflow-wrap: anywhere;
 }
 
 .today-slot-meta {

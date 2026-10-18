@@ -10,7 +10,7 @@ import {
   weekOf,
   type Period,
 } from '../domain/periods';
-import { buildReport } from '../domain/report';
+import { REPORT_VERSION, buildReport } from '../domain/report';
 import type {
   AppSettings,
   CustomFood,
@@ -165,6 +165,7 @@ function makeReport(
  * Relatórios excluídos pela pessoa não são recriados.
  */
 export async function ensureWeeklyReports(today: string = todayISO()): Promise<SavedReport[]> {
+  await migrateReports();
   return db.transaction('rw', [db.meals, db.reports, db.customFoods, db.kv], async () => {
     const context = await loadContext();
     const dates = registeredDates(context.meals);
@@ -181,6 +182,24 @@ export async function ensureWeeklyReports(today: string = todayISO()): Promise<S
       .map((week) => makeReport(context, week, 'semanal', week.number));
     if (created.length) await db.reports.bulkAdd(created);
     return created;
+  });
+}
+
+/**
+ * Gera novamente os relatórios salvos em um formato antigo (por exemplo, os da
+ * versão 1, que guardavam os textos em português), mantendo período e título.
+ */
+export async function migrateReports(): Promise<number> {
+  return db.transaction('rw', [db.meals, db.reports, db.customFoods, db.kv], async () => {
+    const outdated = (await db.reports.toArray()).filter((r) => r.data.version !== REPORT_VERSION);
+    if (!outdated.length) return 0;
+    const context = await loadContext();
+    await db.reports.bulkPut(
+      outdated.map((r) =>
+        makeReport(context, { start: r.startDate, end: r.endDate }, r.kind, r.weekNumber, r.id),
+      ),
+    );
+    return outdated.length;
   });
 }
 

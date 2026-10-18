@@ -39,4 +39,17 @@ describe('FoodInput', () => {
     expect(onAdd).not.toHaveBeenCalled();
     expect(screen.getByRole('alert')).toHaveTextContent('Não encontrei nenhum alimento');
   });
+
+  it('Enter escolhe a sugestão só quando ela foi marcada pelas setas', async () => {
+    const { onAdd, input } = setup();
+    await userEvent.type(input, 'pão inte');
+    // A lista pode abrir embaixo do mouse parado: passar por cima não é escolher.
+    await userEvent.hover(await screen.findByRole('option', { name: /Pão integral/ }));
+    await userEvent.type(input, 'gral{Enter}');
+    expect(onAdd).toHaveBeenLastCalledWith([{ name: 'Pão integral', foodId: 'pao_integral' }]);
+
+    await userEvent.type(input, 'pao{ArrowDown}{Enter}');
+    expect(onAdd).toHaveBeenCalledTimes(2);
+    expect(onAdd.mock.lastCall?.[0]).toHaveLength(1);
+  });
 });

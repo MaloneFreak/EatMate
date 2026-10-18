@@ -6,65 +6,45 @@ import { buildInsights } from './insights';
 import { MAIN_MEALS, MEAL_TYPES, sortMeals } from './meals';
 import { inPeriod, type Period } from './periods';
 import {
-  SCORE_VERSION,
   computeScore,
   isFruitOrVegetable,
   varietyTarget,
   type ScoreDay,
   type ScoreMeal,
 } from './scoring';
-import { foodKey } from './text';
-import type { Food, Grade, Meal, MarkerResult, Nova, ReportData, ReportDay } from './types';
+import { normalize } from './text';
+import type {
+  Food,
+  Grade,
+  MarkerKey,
+  MarkerResult,
+  Meal,
+  Nova,
+  ReportData,
+  ReportDay,
+} from './types';
 
 interface MarkerDef {
-  key: MarkerResult['key'];
-  label: string;
+  key: MarkerKey;
   kind: MarkerResult['kind'];
   test: (food: Food) => boolean;
 }
+
+/** Versão do formato de `ReportData` (2: textos montados na hora, no idioma escolhido). */
+export const REPORT_VERSION = 2;
 
 /**
  * Marcadores de consumo alimentar, inspirados no formulário do SISVAN
  * (Ministério da Saúde): o que queremos ver todos os dias e o que é melhor evitar.
  */
 export const MARKERS: MarkerDef[] = [
-  {
-    key: 'feijao',
-    label: 'Feijão e outras leguminosas',
-    kind: 'bom',
-    test: (f) => f.group === 'leguminosas',
-  },
-  { key: 'frutas', label: 'Frutas', kind: 'bom', test: (f) => f.group === 'frutas' },
-  {
-    key: 'verduras',
-    label: 'Verduras e legumes',
-    kind: 'bom',
-    test: (f) => f.group === 'verduras_legumes',
-  },
-  {
-    key: 'embutidos',
-    label: 'Hambúrguer e embutidos',
-    kind: 'evitar',
-    test: (f) => !!f.tags?.includes('embutido'),
-  },
-  {
-    key: 'adocadas',
-    label: 'Refrigerantes e bebidas adoçadas',
-    kind: 'evitar',
-    test: (f) => !!f.tags?.includes('adocada'),
-  },
-  {
-    key: 'salgadinhos',
-    label: 'Macarrão instantâneo, salgadinhos e biscoitos salgados',
-    kind: 'evitar',
-    test: (f) => !!f.tags?.includes('salgadinho'),
-  },
-  {
-    key: 'doces',
-    label: 'Biscoito recheado, doces e guloseimas',
-    kind: 'evitar',
-    test: (f) => f.group === 'doces',
-  },
+  { key: 'feijao', kind: 'bom', test: (f) => f.group === 'leguminosas' },
+  { key: 'frutas', kind: 'bom', test: (f) => f.group === 'frutas' },
+  { key: 'verduras', kind: 'bom', test: (f) => f.group === 'verduras_legumes' },
+  { key: 'embutidos', kind: 'evitar', test: (f) => !!f.tags?.includes('embutido') },
+  { key: 'adocadas', kind: 'evitar', test: (f) => !!f.tags?.includes('adocada') },
+  { key: 'salgadinhos', kind: 'evitar', test: (f) => !!f.tags?.includes('salgadinho') },
+  { key: 'doces', kind: 'evitar', test: (f) => f.group === 'doces' },
 ];
 
 export interface BuildReportInput {
@@ -156,9 +136,8 @@ export function buildReport({ meals, index, period, profileName }: BuildReportIn
     group,
     ...countWhere((f) => f.group === group),
   })).filter((g) => g.count > 0);
-  const markers: MarkerResult[] = MARKERS.map(({ key, label, kind, test }) => ({
+  const markers: MarkerResult[] = MARKERS.map(({ key, kind, test }) => ({
     key,
-    label,
     kind,
     ...countWhere(test),
   }));
@@ -168,13 +147,14 @@ export function buildReport({ meals, index, period, profileName }: BuildReportIn
     days: new Set(periodMeals.filter((m) => m.type === type).map((m) => m.date)).size,
   }));
 
-  const top = new Map<string, { name: string; count: number; grade?: Grade }>();
+  const top = new Map<string, ReportData['topFoods'][number]>();
   for (const entry of entries) {
-    const key = entry.food ? `food:${entry.food.id}` : `text:${foodKey(entry.name)}`;
+    const key = entry.food ? `food:${entry.food.id}` : `text:${normalize(entry.name)}`;
     const current = top.get(key);
     if (current) current.count++;
     else
       top.set(key, {
+        ...(entry.food ? { foodId: entry.food.id } : {}),
         name: entry.food?.name ?? entry.name,
         count: 1,
         ...(entry.food ? { grade: entry.food.grade } : {}),
@@ -209,7 +189,7 @@ export function buildReport({ meals, index, period, profileName }: BuildReportIn
 
   const markerStats = Object.fromEntries(
     markers.map((m) => [m.key, { days: m.days, count: m.count }]),
-  ) as Record<MarkerResult['key'], { days: number; count: number }>;
+  ) as Record<MarkerKey, { days: number; count: number }>;
   const { positives, attention } = buildInsights({
     registeredDays,
     totalDays: dates.length,
@@ -244,7 +224,7 @@ export function buildReport({ meals, index, period, profileName }: BuildReportIn
   );
 
   return {
-    version: SCORE_VERSION,
+    version: REPORT_VERSION,
     profileName,
     startDate: period.start,
     endDate: period.end,

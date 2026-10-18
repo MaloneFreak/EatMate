@@ -9,6 +9,7 @@ import { ReportView } from '../components/ReportView';
 import { useToast } from '../components/Toast';
 import { useData } from '../data/DataProvider';
 import { deleteReport, isReportStale, regenerateReport } from '../data/repo';
+import { useI18n } from '../i18n/I18nProvider';
 import { reportTitle } from '../lib/reportTitle';
 
 export function SavedReportScreen() {
@@ -17,6 +18,8 @@ export function SavedReportScreen() {
   const navigate = useNavigate();
   const confirm = useConfirm();
   const toast = useToast();
+  const { t } = useI18n();
+  const r = t.reports;
   const [busy, setBusy] = useState(false);
   const report = reports.find((r) => r.id === id);
 
@@ -24,22 +27,22 @@ export function SavedReportScreen() {
     if (loading) return null;
     return (
       <>
-        <PageHeader title="Relatório" back="/relatorios" />
-        <EmptyState icon={<FileX size={30} />} title="Relatório não encontrado">
-          Ele pode ter sido excluído.
+        <PageHeader title={t.currentReport.header} back="/relatorios" />
+        <EmptyState icon={<FileX size={30} />} title={r.notFound}>
+          {r.notFoundText}
         </EmptyState>
       </>
     );
   }
 
-  const title = reportTitle(report);
+  const title = reportTitle(report, t);
   const stale = isReportStale(report, meals, index);
 
   const regenerate = async () => {
     setBusy(true);
     try {
       await regenerateReport(report.id);
-      toast('Relatório gerado novamente com os dados atuais.');
+      toast(r.regeneratedOne);
     } finally {
       setBusy(false);
     }
@@ -47,14 +50,14 @@ export function SavedReportScreen() {
 
   const remove = async () => {
     const ok = await confirm({
-      title: `Excluir “${title}”?`,
-      message: 'Seus registros de refeições continuam salvos.',
-      confirmLabel: 'Excluir relatório',
+      title: r.deleteTitle(title),
+      message: r.deleteCustom,
+      confirmLabel: r.deleteLabel,
       danger: true,
     });
     if (!ok) return;
     await deleteReport(report.id);
-    toast('Relatório excluído.');
+    toast(r.deleted);
     navigate('/relatorios', { replace: true });
   };
 
@@ -68,7 +71,7 @@ export function SavedReportScreen() {
             type="button"
             className="icon-btn danger"
             onClick={remove}
-            aria-label="Excluir relatório"
+            aria-label={r.deleteLabel}
           >
             <Trash2 size={21} aria-hidden="true" />
           </button>
@@ -78,22 +81,20 @@ export function SavedReportScreen() {
         data={report.data}
         title={title}
         generatedAt={report.generatedAt}
-        badge={stale ? <span className="badge badge-warning">Desatualizado</span> : undefined}
+        badge={stale ? <span className="badge badge-warning">{r.stale}</span> : undefined}
       >
         {stale && (
           <div className="notice notice-warning">
             <TriangleAlert size={18} aria-hidden="true" />
             <span className="grow stack-sm">
-              <span>
-                Você alterou registros deste período depois que este relatório foi gerado.
-              </span>
+              <span>{r.staleNotice}</span>
               <button
                 type="button"
                 className="btn btn-sm btn-primary"
                 onClick={regenerate}
                 disabled={busy}
               >
-                <RefreshCw size={16} aria-hidden="true" /> Gerar novamente
+                <RefreshCw size={16} aria-hidden="true" /> {r.regenerate}
               </button>
             </span>
           </div>
@@ -110,7 +111,7 @@ export function SavedReportScreen() {
             onClick={regenerate}
             disabled={busy}
           >
-            <RefreshCw size={18} aria-hidden="true" /> Gerar novamente com os dados atuais
+            <RefreshCw size={18} aria-hidden="true" /> {r.regenerateNow}
           </button>
         )}
       </ReportView>

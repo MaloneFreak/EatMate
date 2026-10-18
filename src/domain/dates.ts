@@ -43,45 +43,6 @@ export function dateRange(start: string, end: string): string[] {
   return out;
 }
 
-const fmt = (options: Intl.DateTimeFormatOptions) => new Intl.DateTimeFormat('pt-BR', options);
-const shortFmt = fmt({ day: '2-digit', month: '2-digit' });
-const fullFmt = fmt({ day: '2-digit', month: '2-digit', year: 'numeric' });
-const longFmt = fmt({ weekday: 'long', day: 'numeric', month: 'long' });
-const weekdayShortFmt = fmt({ weekday: 'short' });
-const monthYearFmt = fmt({ month: 'long', year: 'numeric' });
-const dayMonthFmt = fmt({ day: 'numeric', month: 'long' });
-const dateTimeFmt = fmt({
-  day: '2-digit',
-  month: '2-digit',
-  year: 'numeric',
-  hour: '2-digit',
-  minute: '2-digit',
-});
-
-/** "18/10" */
-export const formatShort = (iso: string) => shortFmt.format(parseISODate(iso));
-/** "18/10/2026" */
-export const formatFull = (iso: string) => fullFmt.format(parseISODate(iso));
-/** "sábado, 18 de outubro" */
-export const formatLong = (iso: string) => longFmt.format(parseISODate(iso));
-/** "sáb" */
-export const formatWeekdayShort = (iso: string) =>
-  weekdayShortFmt.format(parseISODate(iso)).replace('.', '');
-/** "16 de outubro" */
-export const formatDayMonth = (iso: string) => dayMonthFmt.format(parseISODate(iso));
-/** "Outubro de 2026" */
-export const formatMonthYear = (iso: string) => capitalize(monthYearFmt.format(parseISODate(iso)));
-/** "18/10/2026, 14:30" */
-export const formatDateTime = (timestamp: number) => dateTimeFmt.format(new Date(timestamp));
-
-/** "12/10 a 18/10" */
-export function formatPeriod(start: string, end: string): string {
-  const sameYear = start.slice(0, 4) === end.slice(0, 4);
-  return sameYear
-    ? `${formatShort(start)} a ${formatShort(end)}`
-    : `${formatFull(start)} a ${formatFull(end)}`;
-}
-
 export function capitalize(text: string): string {
   return text ? text.charAt(0).toUpperCase() + text.slice(1) : text;
 }

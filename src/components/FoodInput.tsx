@@ -1,8 +1,8 @@
 import { Plus } from 'lucide-react';
 import { useId, useMemo, useRef, useState, type KeyboardEvent } from 'react';
 import type { FoodIndex, FoodSuggestion } from '../domain/foodIndex';
-import { groupLabel } from '../domain/groups';
 import { parseFoodText, splitTyping, type ParsedItem } from '../domain/parser';
+import { useI18n } from '../i18n/I18nProvider';
 import { GradeBadge } from './GradeBadge';
 
 interface FoodInputProps {
@@ -16,15 +16,19 @@ interface FoodInputProps {
  * também entende frases inteiras ("café com leite e 2 torradas").
  */
 export function FoodInput({ index, usage, onAdd }: FoodInputProps) {
+  const { t } = useI18n();
   const [text, setText] = useState('');
   const [open, setOpen] = useState(false);
   const [active, setActive] = useState(-1);
+  // Enter só escolhe uma sugestão marcada pelas setas: a lista pode abrir embaixo do
+  // ponteiro do mouse parado, e aí o "hover" não foi uma escolha da pessoa.
+  const [byKeyboard, setByKeyboard] = useState(false);
   const [hint, setHint] = useState<string | null>(null);
   const inputRef = useRef<HTMLInputElement>(null);
   const listId = useId();
   const hintId = useId();
 
-  const typing = useMemo(() => splitTyping(text), [text]);
+  const typing = useMemo(() => splitTyping(text, index.language), [text, index.language]);
   const suggestions = useMemo(
     () => (typing.query.trim() ? index.search(typing.query, { limit: 6, usage }) : []),
     [typing.query, index, usage],
@@ -35,6 +39,7 @@ export function FoodInput({ index, usage, onAdd }: FoodInputProps) {
     setText('');
     setOpen(false);
     setActive(-1);
+    setByKeyboard(false);
     setHint(null);
     inputRef.current?.focus();
   };
@@ -43,9 +48,7 @@ export function FoodInput({ index, usage, onAdd }: FoodInputProps) {
     if (!text.trim()) return;
     const items = parseFoodText(text, index);
     if (!items.length) {
-      setHint(
-        'Não encontrei nenhum alimento nesse texto. Tente algo como "arroz, feijão e salada".',
-      );
+      setHint(t.foodInput.nothingFound);
       return;
     }
     onAdd(items);
@@ -69,14 +72,16 @@ export function FoodInput({ index, usage, onAdd }: FoodInputProps) {
     if (event.key === 'ArrowDown' && suggestions.length) {
       event.preventDefault();
       setOpen(true);
+      setByKeyboard(true);
       setActive((i) => (i + 1) % suggestions.length);
     } else if (event.key === 'ArrowUp' && suggestions.length) {
       event.preventDefault();
       setOpen(true);
+      setByKeyboard(true);
       setActive((i) => (i <= 0 ? suggestions.length - 1 : i - 1));
     } else if (event.key === 'Enter') {
       event.preventDefault();
-      const selected = showList && active >= 0 ? suggestions[active] : undefined;
+      const selected = showList && byKeyboard && active >= 0 ? suggestions[active] : undefined;
       if (selected) choose(selected);
       else commitText();
     } else if (event.key === 'Escape') {
@@ -93,13 +98,13 @@ export function FoodInput({ index, usage, onAdd }: FoodInputProps) {
           className="input"
           type="text"
           role="combobox"
-          aria-label="O que você comeu?"
+          aria-label={t.foodInput.label}
           aria-autocomplete="list"
           aria-expanded={showList}
           aria-controls={listId}
           aria-activedescendant={showList && active >= 0 ? `${listId}-${active}` : undefined}
           aria-describedby={hint ? hintId : undefined}
-          placeholder='Ex.: "arroz, feijão e salada"'
+          placeholder={t.foodInput.placeholder}
           autoComplete="off"
           enterKeyHint="done"
           value={text}
@@ -118,13 +123,13 @@ export function FoodInput({ index, usage, onAdd }: FoodInputProps) {
           className="btn btn-primary"
           onClick={commitText}
           disabled={!text.trim()}
-          aria-label="Adicionar"
+          aria-label={t.foodInput.add}
         >
           <Plus size={22} aria-hidden="true" />
         </button>
       </div>
       {showList && (
-        <ul className="suggestions" id={listId} role="listbox" aria-label="Sugestões de alimentos">
+        <ul className="suggestions" id={listId} role="listbox" aria-label={t.foodInput.suggestions}>
           {suggestions.map((s, i) => (
             <li
               key={s.food.id}
@@ -134,14 +139,17 @@ export function FoodInput({ index, usage, onAdd }: FoodInputProps) {
               className="suggestion"
               onMouseDown={(e) => e.preventDefault()}
               onClick={() => choose(s)}
-              onMouseEnter={() => setActive(i)}
+              onMouseEnter={() => {
+                setActive(i);
+                setByKeyboard(false);
+              }}
             >
               <GradeBadge grade={s.food.grade} />
               <span className="suggestion-text">
                 <span className="suggestion-name">{s.text}</span>
                 <span className="suggestion-meta">
                   {s.text.toLowerCase() !== s.food.name.toLowerCase() ? `${s.food.name} · ` : ''}
-                  {groupLabel(s.food.group)}
+                  {t.groups[s.food.group]}
                 </span>
               </span>
             </li>

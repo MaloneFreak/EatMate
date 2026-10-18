@@ -1,11 +1,14 @@
 import { describe, expect, it } from 'vitest';
 import { buildDemoMeals } from './demo';
-import { reportToAIPrompt, reportToMarkdown } from './exportText';
+import { insightText, reportToAIPrompt, reportToMarkdown } from './exportText';
 import { FoodIndex } from './foodIndex';
 import { buildReport } from './report';
 import type { Meal } from './types';
+import { createFormat } from '../i18n/format';
+import { MESSAGES } from '../i18n/messages';
 
 const index = new FoodIndex();
+const pt = { t: MESSAGES.pt, f: createFormat('pt-BR'), index };
 const period = { start: '2026-10-12', end: '2026-10-18' };
 
 describe('buildReport', () => {
@@ -31,7 +34,9 @@ describe('buildReport', () => {
   it('gera destaques positivos e de atenção', () => {
     expect(report.positives.length).toBeGreaterThan(0);
     expect(report.attention.length).toBeGreaterThan(0);
-    expect(report.attention.join(' ')).toMatch(/bebidas adoçadas/i);
+    expect(report.attention.map((i) => i.key)).toContain('sugary');
+    const texts = report.attention.map((i) => insightText(i, pt.t, pt.f));
+    expect(texts.join(' ')).toMatch(/bebidas adoçadas/i);
   });
 
   it('lista os alimentos mais frequentes', () => {
@@ -71,14 +76,17 @@ describe('buildReport', () => {
     expect(r.registeredDays).toBe(1);
     expect(r.unclassified).toEqual(['Xpto']);
     expect(r.days.filter((d) => d.mealsCount === 0)).toHaveLength(6);
-    expect(r.attention.join(' ')).toMatch(/registrou 1 dia de 7/);
+    expect(r.attention).toContainEqual({ key: 'incomplete', n: 1, of: 7 });
+    expect(insightText({ key: 'incomplete', n: 1, of: 7 }, pt.t, pt.f)).toMatch(
+      /registrou 1 dia de 7/,
+    );
   });
 
   it('funciona sem nenhum registro', () => {
     const empty = buildReport({ meals: [], index, period, profileName: 'Pedro' });
     expect(empty.score).toBeNull();
     expect(empty.positives).toEqual([]);
-    expect(reportToMarkdown(empty)).toContain('sem dados suficientes');
+    expect(reportToMarkdown(empty, pt)).toContain('sem dados suficientes');
   });
 });
 
@@ -91,19 +99,43 @@ describe('exportação', () => {
   });
 
   it('gera Markdown com o diário completo', () => {
-    const md = reportToMarkdown(report);
+    const md = reportToMarkdown(report, pt);
     expect(md).toContain('# Relatório alimentar — EatMate');
     expect(md).toContain('**Nome:** Pedro');
     expect(md).toContain('12/10/2026 a 18/10/2026');
+    expect(md).toContain(`- ${insightText(report.positives[0]!, pt.t, pt.f)}`);
     expect(md).toContain('## Diário alimentar');
-    expect(md).toContain('Pão integral (2 fatias) [A]');
+    expect(md).toContain('Pão integral [A]');
     expect(md).toContain('Domingo, 18 de outubro');
   });
 
   it('gera um pedido pronto para IA', () => {
-    const prompt = reportToAIPrompt(report);
+    const prompt = reportToAIPrompt(report, pt);
     expect(prompt).toMatch(/^Olá! Sou Pedro/);
     expect(prompt).toContain('cultura alimentar brasileira');
     expect(prompt).toContain('## Diário alimentar');
   });
+});
+
+it('gera o texto no idioma escolhido', () => {
+  const en = new FoodIndex([], 'en');
+  const data = buildReport({
+    meals: buildDemoMeals('2026-10-18', en),
+    index: en,
+    period,
+    profileName: '',
+  });
+  const md = reportToMarkdown(data, { t: MESSAGES.en, f: createFormat('en-US'), index: en });
+  expect(md).toContain('Brown rice');
+  const de = new FoodIndex([], 'de');
+  const deMd = reportToMarkdown(data, { t: MESSAGES.de, f: createFormat('de-DE'), index: de });
+  expect(deMd).toContain('Nachmittagssnack');
+  expect(deMd).not.toContain('\u00ad');
+  const same = buildReport({
+    meals: buildDemoMeals('2026-10-18', index),
+    index,
+    period,
+    profileName: '',
+  });
+  expect(data.score?.total).toBe(same.score?.total);
 });

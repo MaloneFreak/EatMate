@@ -21,22 +21,6 @@ export function gradeFromScore(score: number): Grade {
   return GRADE_THRESHOLDS.find((t) => score >= t.min)?.grade ?? 'E';
 }
 
-export const GRADE_LABELS: Record<Grade, string> = {
-  A: 'Excelente',
-  B: 'Boa',
-  C: 'Regular',
-  D: 'Precisa melhorar',
-  E: 'Precisa de atenção',
-};
-
-export const GRADE_MESSAGES: Record<Grade, string> = {
-  A: 'Sua alimentação está ótima! Continue assim.',
-  B: 'Você está no caminho certo — pequenos ajustes podem levar ao A.',
-  C: 'Há bons hábitos, mas também espaço para melhorar.',
-  D: 'Sua alimentação precisa de alguns ajustes. Veja as dicas do relatório.',
-  E: 'Que tal começar com pequenas trocas no dia a dia? O relatório mostra por onde começar.',
-};
-
 export function isGrade(value: unknown): value is Grade {
   return typeof value === 'string' && (GRADES as string[]).includes(value);
 }

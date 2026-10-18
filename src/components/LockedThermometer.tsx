@@ -1,9 +1,11 @@
 import { ChevronRight, Lock } from 'lucide-react';
 import { Link } from 'react-router';
 import { UNLOCK_DAYS } from '../domain/periods';
+import { useI18n } from '../i18n/I18nProvider';
 
 /** Aviso mostrado enquanto a pessoa ainda não tem 7 dias registrados. */
 export function LockedThermometer({ registeredDays }: { registeredDays: number }) {
+  const { t } = useI18n();
   const missing = UNLOCK_DAYS - registeredDays;
   return (
     <section className="card thermo-card locked" aria-labelledby="locked-title">
@@ -11,29 +13,24 @@ export function LockedThermometer({ registeredDays }: { registeredDays: number }
         <span className="lock-icon">
           <Lock size={18} aria-hidden="true" />
         </span>
-        <h2 id="locked-title">Termômetro da alimentação</h2>
+        <h2 id="locked-title">{t.locked.title}</h2>
       </div>
-      <p className="muted">
-        Registre o que você come por {UNLOCK_DAYS} dias para ver a qualidade da sua alimentação, com
-        nota de A a E, e receber seu primeiro relatório.
-      </p>
+      <p className="muted">{t.locked.text(UNLOCK_DAYS)}</p>
       <div
         className="progress-dots"
         role="img"
-        aria-label={`${registeredDays} de ${UNLOCK_DAYS} dias registrados`}
+        aria-label={t.locked.progress(registeredDays, UNLOCK_DAYS)}
       >
         {Array.from({ length: UNLOCK_DAYS }, (_, i) => (
           <span key={i} className={`dot${i < registeredDays ? ' filled' : ''}`} />
         ))}
       </div>
       <p className="small">
-        <strong>
-          {registeredDays} de {UNLOCK_DAYS} dias
-        </strong>{' '}
-        registrados — {missing === 1 ? 'falta 1 dia' : `faltam ${missing} dias`}.
+        <strong>{t.locked.count(registeredDays, UNLOCK_DAYS)}</strong> {t.locked.registered} —{' '}
+        {t.locked.missing(missing)}.
       </p>
       <Link to="/relatorio/exemplo" className="link-btn">
-        Ver um relatório de exemplo <ChevronRight size={18} aria-hidden="true" />
+        {t.locked.example} <ChevronRight size={18} aria-hidden="true" />
       </Link>
     </section>
   );

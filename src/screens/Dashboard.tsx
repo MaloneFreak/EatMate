@@ -6,16 +6,18 @@ import { ScoreDelta } from '../components/ScoreDelta';
 import { ScoreScale } from '../components/ScoreScale';
 import { Thermometer } from '../components/Thermometer';
 import { useData } from '../data/DataProvider';
-import { capitalize, formatLong, formatPeriod, todayISO } from '../domain/dates';
-import { GRADE_LABELS, GRADE_MESSAGES } from '../domain/grades';
+import { todayISO } from '../domain/dates';
 import { MEAL_TYPES } from '../domain/meals';
 import type { Meal } from '../domain/types';
+import { useI18n } from '../i18n/I18nProvider';
 import { currentStreak, mealsInLastDays } from '../lib/stats';
 import { tipOfTheDay } from '../lib/tips';
 import { useCurrentReport } from '../lib/useCurrentReport';
 
 export function DashboardScreen() {
   const { profile, meals, dates } = useData();
+  const { t, f } = useI18n();
+  const d = t.dashboard;
   const today = todayISO();
   const todayMeals = meals.filter((m) => m.date === today);
   const firstName = profile?.name.split(' ')[0] ?? '';
@@ -23,8 +25,8 @@ export function DashboardScreen() {
   return (
     <div className="stack">
       <header className="greeting">
-        <h1>Olá, {firstName}!</h1>
-        <p className="muted">{capitalize(formatLong(today))}</p>
+        <h1>{d.hello(firstName)}</h1>
+        <p className="muted">{f.long(today)}</p>
       </header>
 
       <Link to="/registrar" className="cta">
@@ -32,8 +34,8 @@ export function DashboardScreen() {
           <Plus size={32} strokeWidth={2.6} aria-hidden="true" />
         </span>
         <span>
-          <span className="cta-title">Registrar refeição</span>
-          <span className="cta-subtitle">O que você comeu agora ou mais cedo?</span>
+          <span className="cta-title">{d.ctaTitle}</span>
+          <span className="cta-subtitle">{d.ctaSubtitle}</span>
         </span>
       </Link>
 
@@ -45,26 +47,26 @@ export function DashboardScreen() {
         <div className="kpi">
           <Flame className="kpi-icon" size={20} aria-hidden="true" />
           <div className="kpi-value">{currentStreak(dates, today)}</div>
-          <div className="kpi-label">dias seguidos</div>
+          <div className="kpi-label">{d.streak}</div>
         </div>
         <div className="kpi">
           <CalendarDays className="kpi-icon" size={20} aria-hidden="true" />
           <div className="kpi-value">{dates.length}</div>
-          <div className="kpi-label">dias registrados</div>
+          <div className="kpi-label">{d.registeredDays}</div>
         </div>
         <div className="kpi">
           <Utensils className="kpi-icon" size={20} aria-hidden="true" />
           <div className="kpi-value">{mealsInLastDays(meals, today)}</div>
-          <div className="kpi-label">refeições em 7 dias</div>
+          <div className="kpi-label">{d.meals7}</div>
         </div>
       </div>
 
       <section className="card tip-card">
         <div className="row">
           <Lightbulb size={20} className="tip-icon" aria-hidden="true" />
-          <h2>Dica do dia</h2>
+          <h2>{d.tip}</h2>
         </div>
-        <p>{tipOfTheDay(today)}</p>
+        <p>{tipOfTheDay(t.tips, today)}</p>
       </section>
     </div>
   );
@@ -72,19 +74,16 @@ export function DashboardScreen() {
 
 function ThermometerCard() {
   const { unlocked, registeredDays, period, report } = useCurrentReport();
+  const { t, f } = useI18n();
 
   if (!unlocked) return <LockedThermometer registeredDays={registeredDays} />;
 
   const score = report?.score;
   return (
-    <Link
-      to="/relatorio"
-      className="card card-link thermo-card"
-      aria-label="Ver relatório completo"
-    >
+    <Link to="/relatorio" className="card card-link thermo-card" aria-label={t.dashboard.seeReport}>
       <div className="card-title">
-        <h2>Qualidade da sua alimentação</h2>
-        {period && <span className="badge">{formatPeriod(period.start, period.end)}</span>}
+        <h2>{t.dashboard.thermoTitle}</h2>
+        {period && <span className="badge">{f.period(period.start, period.end)}</span>}
       </div>
       {score ? (
         <div className="thermo-body">
@@ -96,7 +95,7 @@ function ThermometerCard() {
             </p>
             <ScoreScale grade={score.grade} />
             <p className="thermo-label">
-              <strong>{GRADE_LABELS[score.grade]}</strong> · {GRADE_MESSAGES[score.grade]}
+              <strong>{t.grades.labels[score.grade]}</strong> · {t.grades.messages[score.grade]}
             </p>
             {report?.previous && (
               <ScoreDelta current={score.total} previous={report.previous.score} />
@@ -104,28 +103,27 @@ function ThermometerCard() {
           </div>
         </div>
       ) : (
-        <p className="muted">
-          Ainda não há alimentos reconhecidos suficientes nos últimos 7 dias para calcular a nota.
-        </p>
+        <p className="muted">{t.dashboard.noScore}</p>
       )}
       <span className="link-btn">
-        Ver relatório completo <ChevronRight size={18} aria-hidden="true" />
+        {t.dashboard.seeReport} <ChevronRight size={18} aria-hidden="true" />
       </span>
     </Link>
   );
 }
 
 function TodayCard({ today, meals }: { today: string; meals: Meal[] }) {
+  const { t } = useI18n();
   return (
     <section className="card" aria-labelledby="today-title">
       <div className="card-title">
-        <h2 id="today-title">Hoje</h2>
+        <h2 id="today-title">{t.dashboard.today}</h2>
         <Link to={`/historico/${today}`} className="link-btn small">
-          Ver dia <ChevronRight size={16} aria-hidden="true" />
+          {t.dashboard.seeDay} <ChevronRight size={16} aria-hidden="true" />
         </Link>
       </div>
       <ul className="today-grid">
-        {MEAL_TYPES.map(({ type, label }) => {
+        {MEAL_TYPES.map(({ type }) => {
           const ofType = meals.filter((m) => m.type === type);
           const items = ofType.flatMap((m) => m.items);
           const done = ofType.length > 0;
@@ -141,13 +139,17 @@ function TodayCard({ today, meals }: { today: string; meals: Meal[] }) {
                   <MealIcon type={type} size={18} />
                 </span>
                 <span className="today-slot-text">
-                  <span className="today-slot-label">{label}</span>
+                  <span className="today-slot-label">{t.mealTypes[type]}</span>
                   <span className="today-slot-meta">
-                    {done ? items.map((i) => i.name).join(', ') : 'Adicionar'}
+                    {done ? items.map((i) => i.name).join(', ') : t.dashboard.add}
                   </span>
                 </span>
                 {done ? (
-                  <Check size={18} className="today-slot-status" aria-label="Registrado" />
+                  <Check
+                    size={18}
+                    className="today-slot-status"
+                    aria-label={t.dashboard.registered}
+                  />
                 ) : (
                   <Plus size={18} className="today-slot-status" aria-hidden="true" />
                 )}

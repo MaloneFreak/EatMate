@@ -1,5 +1,6 @@
 import { useAnimatedNumber } from '../lib/useAnimatedNumber';
 import type { Grade } from '../domain/types';
+import { useI18n } from '../i18n/I18nProvider';
 
 interface ThermometerProps {
   /** Nota de 0 a 100. */
@@ -15,6 +16,7 @@ const TICKS = [0, 25, 50, 75, 100];
 
 /** Termômetro da qualidade da alimentação: a coluna sobe até a nota e ganha a cor da letra. */
 export function Thermometer({ score, grade, height = 160 }: ThermometerProps) {
+  const { t } = useI18n();
   const value = useAnimatedNumber(Math.max(0, Math.min(100, score)));
   const level = BOTTOM - (value / 100) * (BOTTOM - TOP);
   const color = `var(--grade-${grade.toLowerCase()})`;
@@ -26,7 +28,7 @@ export function Thermometer({ score, grade, height = 160 }: ThermometerProps) {
       width={(height * 64) / 200}
       height={height}
       role="img"
-      aria-label={`Termômetro: ${Math.round(score)} de 100 pontos, nota ${grade}`}
+      aria-label={t.grades.thermometer(Math.round(score), grade)}
     >
       <rect x="20" y="4" width="24" height="160" rx="12" style={{ fill: track }} />
       <circle cx="32" cy="168" r="27" style={{ fill: track }} />

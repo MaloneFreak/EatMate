@@ -2,7 +2,7 @@ import { beforeEach, describe, expect, it } from 'vitest';
 import { addDays } from '../domain/dates';
 import { FoodIndex } from '../domain/foodIndex';
 import { CLASSIFY_OPTIONS } from '../domain/groups';
-import { exportBackup, importBackup, parseBackup } from './backup';
+import { BackupError, exportBackup, importBackup, parseBackup } from './backup';
 import { db } from './db';
 import {
   classifyFood,
@@ -11,6 +11,7 @@ import {
   ensureWeeklyReports,
   getSettings,
   isReportStale,
+  migrateReports,
   regenerateReport,
   saveMeal,
   saveProfileName,
@@ -86,6 +87,41 @@ describe('relatórios semanais automáticos', () => {
   });
 });
 
+describe('relatórios da versão 1', () => {
+  it('são gerados novamente no formato atual, mantendo o título', async () => {
+    await logDays('2026-10-01', 7);
+    const [report] = await ensureWeeklyReports('2026-10-08');
+    // Formato antigo: textos prontos em português.
+    const legacy = {
+      ...report!,
+      data: {
+        ...report!.data,
+        version: 1,
+        positives: ['Boa variedade.'],
+        attention: ['Poucas frutas.'],
+      },
+    };
+    await db.reports.put(legacy as unknown as typeof report & object);
+    expect(await migrateReports()).toBe(1);
+    const migrated = await db.reports.get(report!.id);
+    expect(migrated?.data.version).toBe(2);
+    expect(migrated?.weekNumber).toBe(1);
+    expect(migrated?.data.attention.every((i) => typeof i.key === 'string')).toBe(true);
+    expect(await migrateReports()).toBe(0);
+  });
+
+  it('são aceitos ao importar um backup antigo', async () => {
+    await logDays('2026-10-01', 7);
+    const [report] = await ensureWeeklyReports('2026-10-08');
+    const backup = await exportBackup();
+    const old = JSON.parse(JSON.stringify(backup));
+    old.reports[0].data.version = 1;
+    old.reports[0].data.positives = ['Boa variedade.'];
+    await importBackup(parseBackup(JSON.stringify(old)));
+    expect((await db.reports.get(report!.id))?.data.version).toBe(2);
+  });
+});
+
 describe('alimentos personalizados', () => {
   it('classifica um alimento desconhecido e reaproveita pelo nome', async () => {
     const fruta = CLASSIFY_OPTIONS.find((o) => o.key === 'fruta')!;
@@ -118,8 +154,8 @@ describe('backup', () => {
   });
 
   it('recusa arquivos que não são backup', () => {
-    expect(() => parseBackup('não é json')).toThrow(/JSON inválido/);
-    expect(() => parseBackup('{"foo": 1}')).toThrow(/não parece ser um backup/);
+    expect(() => parseBackup('não é json')).toThrow(new BackupError('invalidJson'));
+    expect(() => parseBackup('{"foo": 1}')).toThrow(new BackupError('notEatmate'));
   });
 
   it('ignora registros inválidos', () => {

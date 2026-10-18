@@ -1,3 +1,5 @@
+import { FOOD_NAMES } from './foodNames';
+import type { Language } from './language';
 import type { Food, FoodGroup, FoodTag, Grade, Nova } from './types';
 
 /*
@@ -373,3 +375,19 @@ export const BUILTIN_FOODS: Food[] = [
   ...gorduras,
   ...alcool,
 ];
+
+const localized = new Map<Language, Food[]>([['pt', BUILTIN_FOODS]]);
+
+/** A base com nomes e apelidos no idioma escolhido (nota, grupo e NOVA não mudam). */
+export function localizedFoods(language: Language): Food[] {
+  let foods = localized.get(language);
+  if (!foods) {
+    const names = FOOD_NAMES[language as Exclude<Language, 'pt'>];
+    foods = BUILTIN_FOODS.map((f) => {
+      const [name, ...aliases] = names[f.id] ?? [f.name, ...(f.aliases ?? [])];
+      return { ...f, name, aliases };
+    });
+    localized.set(language, foods);
+  }
+  return foods;
+}

@@ -1,6 +1,7 @@
 import { X } from 'lucide-react';
 import { useEffect, useId, useRef, type ReactNode } from 'react';
 import { createPortal } from 'react-dom';
+import { useI18n } from '../i18n/I18nProvider';
 
 interface SheetProps {
   open: boolean;
@@ -14,6 +15,7 @@ const FOCUSABLE = 'button, [href], input, select, textarea, [tabindex]:not([tabi
 
 /** Painel que sobe da parte de baixo da tela (no computador, aparece centralizado). */
 export function Sheet({ open, onClose, title, description, children }: SheetProps) {
+  const { t } = useI18n();
   const titleId = useId();
   const ref = useRef<HTMLDivElement>(null);
   const onCloseRef = useRef(onClose);
@@ -80,7 +82,12 @@ export function Sheet({ open, onClose, title, description, children }: SheetProp
             <h2 id={titleId}>{title}</h2>
             {description && <p className="muted small">{description}</p>}
           </div>
-          <button type="button" className="icon-btn small" onClick={onClose} aria-label="Fechar">
+          <button
+            type="button"
+            className="icon-btn small"
+            onClick={onClose}
+            aria-label={t.common.close}
+          >
             <X size={20} aria-hidden="true" />
           </button>
         </div>
