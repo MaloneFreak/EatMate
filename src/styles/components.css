@@ -1188,16 +1188,27 @@ details.disclosure[open] > summary::after {
   align-items: center;
 }
 
-.language-picker svg {
+/* Ícone à esquerda e setinha própria à direita (a seta nativa fica colada na borda). */
+.language-picker-icon,
+.language-picker-chevron {
   position: absolute;
-  left: 14px;
   color: var(--text-muted);
   pointer-events: none;
 }
 
+.language-picker-icon {
+  left: 14px;
+}
+
+.language-picker-chevron {
+  right: 16px;
+}
+
 .language-picker select {
   padding-left: 42px;
-  appearance: auto;
+  padding-right: 44px;
+  appearance: none;
+  -webkit-appearance: none;
   cursor: pointer;
 }
 

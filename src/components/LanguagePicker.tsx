@@ -1,4 +1,4 @@
-import { Languages } from 'lucide-react';
+import { ChevronDown, Languages } from 'lucide-react';
 import { LANGUAGES } from '../domain/language';
 import { useI18n } from '../i18n/I18nProvider';
 import { LANGUAGE_INFO } from '../i18n/languages';
@@ -8,7 +8,7 @@ export function LanguagePicker({ compact = false }: { compact?: boolean }) {
   const { t, language, setLanguage } = useI18n();
   return (
     <label className={`language-picker${compact ? ' compact' : ''}`}>
-      <Languages size={18} aria-hidden="true" />
+      <Languages className="language-picker-icon" size={18} aria-hidden="true" />
       <span className="visually-hidden">{t.profile.language}</span>
       <select
         className="input"
@@ -21,6 +21,7 @@ export function LanguagePicker({ compact = false }: { compact?: boolean }) {
           </option>
         ))}
       </select>
+      <ChevronDown className="language-picker-chevron" size={18} aria-hidden="true" />
     </label>
   );
 }

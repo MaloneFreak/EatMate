@@ -361,7 +361,8 @@ export const de: Messages = {
     save: 'Mahlzeit speichern',
     changesSaved: 'Änderungen gespeichert!',
     saved: (meal: string) => `${meal} eingetragen!`,
-    saveError: 'Speichern hat nicht geklappt. Versuch es noch mal.',
+    saveError: 'Die Mahlzeit konnte nicht gespeichert werden. Trag sie bitte noch mal ein.',
+    deleteError: 'Die Mahlzeit konnte nicht gelöscht werden. Versuch es noch mal.',
     deleteTitle: 'Diese Mahlzeit löschen?',
     deleteMessage: (meal: string, date: string) =>
       `${meal} vom ${date}. Das kann nicht rückgängig gemacht werden.`,
@@ -511,6 +512,7 @@ export const de: Messages = {
       'Deine eingetragenen Mahlzeiten bleiben gespeichert. Du kannst diesen Bericht jederzeit neu erstellen.',
     deleteCustom: 'Deine eingetragenen Mahlzeiten bleiben gespeichert.',
     deleted: 'Bericht gelöscht.',
+    deleteError: 'Der Bericht konnte nicht gelöscht werden. Versuch es noch mal.',
     emptyTitle: 'Noch keine gespeicherten Berichte',
     emptyUnlocked:
       'Der erste Wochenbericht erscheint hier, sobald die Woche vorbei ist. Du kannst auch den aktuellen Bericht speichern.',

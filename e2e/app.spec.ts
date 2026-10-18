@@ -175,3 +175,37 @@ test('restaurar backup na tela de boas-vindas (troca de celular)', async ({ page
   await expect(page.getByRole('heading', { name: 'Olá, Ana!' })).toBeVisible();
   await expect(page.getByRole('link', { name: 'Ver relatório completo' })).toBeVisible();
 });
+
+test('salvar uma refeição pelo cartão "Hoje" volta para o início', async ({ page }) => {
+  await onboard(page);
+  const home = page.getByRole('heading', { name: 'Olá, Pedro!' });
+  const input = page.getByRole('combobox', { name: 'O que você comeu?' });
+
+  await page.getByRole('link', { name: /Ceia/ }).click();
+  await input.fill('chá de camomila');
+  await input.press('Enter');
+  await page.getByRole('button', { name: 'Salvar refeição' }).click();
+  await expect(home).toBeVisible();
+  await expect(page.getByText('Ceia registrado!')).toBeVisible();
+
+  // Com a ceia já registrada, o mesmo cartão abre a edição.
+  await page.getByRole('link', { name: /Ceia/ }).click();
+  await input.fill('banana');
+  await input.press('Enter');
+  await page.getByRole('button', { name: 'Salvar alterações' }).click();
+  await expect(home).toBeVisible();
+  await expect(page.getByText('Alterações salvas!')).toBeVisible();
+});
+
+test('salvar volta para o início mesmo quando o app abriu direto no formulário', async ({
+  page,
+}) => {
+  await onboard(page);
+  await page.goto('./#/registrar?refeicao=ceia');
+  await page.reload();
+  const input = page.getByRole('combobox', { name: 'O que você comeu?' });
+  await input.fill('maçã');
+  await input.press('Enter');
+  await page.getByRole('button', { name: 'Salvar refeição' }).click();
+  await expect(page.getByRole('heading', { name: 'Olá, Pedro!' })).toBeVisible();
+});

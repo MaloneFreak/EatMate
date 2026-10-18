@@ -1,7 +1,7 @@
 {
   "name": "eatmate",
   "private": true,
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "EatMate — diário alimentar simples com termômetro de qualidade da alimentação e relatórios semanais.",
   "type": "module",
   "scripts": {

@@ -342,7 +342,8 @@ export const it: Messages = {
     save: 'Salva pasto',
     changesSaved: 'Modifiche salvate!',
     saved: (meal: string) => `Pasto registrato: ${meal}.`,
-    saveError: 'Impossibile salvare. Riprova.',
+    saveError: 'Impossibile salvare il pasto. Registralo di nuovo.',
+    deleteError: 'Impossibile eliminare il pasto. Riprova.',
     deleteTitle: 'Eliminare questo pasto?',
     deleteMessage: (meal: string, date: string) =>
       `${meal} del giorno ${date}. Questa azione non si può annullare.`,
@@ -495,6 +496,7 @@ export const it: Messages = {
       'Le registrazioni dei tuoi pasti restano salvate. Puoi rigenerare questo report quando vuoi.',
     deleteCustom: 'Le registrazioni dei tuoi pasti restano salvate.',
     deleted: 'Report eliminato.',
+    deleteError: 'Impossibile eliminare il report. Riprova.',
     emptyTitle: 'Ancora nessun report salvato',
     emptyUnlocked:
       'Il primo report settimanale comparirà qui alla fine della settimana. Puoi anche salvare il report attuale.',

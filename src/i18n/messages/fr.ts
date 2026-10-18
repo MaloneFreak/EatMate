@@ -359,7 +359,8 @@ export const fr: Messages = {
     save: 'Enregistrer le repas',
     changesSaved: 'Modifications enregistrées\u00a0!',
     saved: (meal: string) => `${meal}\u00a0: c’est noté\u00a0!`,
-    saveError: 'Impossible d’enregistrer. Réessayez.',
+    saveError: 'Impossible d’enregistrer le repas. Ajoutez-le à nouveau.',
+    deleteError: 'Impossible de supprimer le repas. Réessayez.',
     deleteTitle: 'Supprimer ce repas\u00a0?',
     deleteMessage: (meal: string, date: string) =>
       `${meal} du ${date}. Cette action est irréversible.`,
@@ -509,6 +510,7 @@ export const fr: Messages = {
       'Vos repas enregistrés restent sauvegardés. Vous pourrez régénérer ce rapport quand vous voudrez.',
     deleteCustom: 'Vos repas enregistrés restent sauvegardés.',
     deleted: 'Rapport supprimé.',
+    deleteError: 'Impossible de supprimer le rapport. Réessayez.',
     emptyTitle: 'Aucun rapport enregistré pour l’instant',
     emptyUnlocked:
       'Le premier rapport hebdomadaire apparaîtra ici à la fin de la semaine. Vous pouvez aussi enregistrer le rapport actuel.',
