@@ -2,7 +2,7 @@
 
 **Dein einfaches Ernährungstagebuch — ganz ohne Kalorienzählen.**
 
-🌍 [Português](README.md) · [English](README.en.md) · [Español](README.es.md) · **Deutsch** · [Français](README.fr.md) · [Italiano](README.it.md)
+🌍 [English](README.md) · [Português](README.pt.md) · [Español](README.es.md) · **Deutsch** · [Français](README.fr.md) · [Italiano](README.it.md)
 
 Schreib auf, was du gegessen hast, so wie du es sagen würdest — _„eine Tasse Kaffee und zwei Scheiben Vollkornbrot“_ — und EatMate erkennt die Lebensmittel von selbst. Nach 7 Tagen zeigt ein **Thermometer** die Qualität deiner Ernährung als Note von **A bis E** (im Stil des Nutri-Score), dazu einen **ausführlichen Bericht** für deine Ernährungsberatung oder zum Einfügen in eine KI (ChatGPT, Gemini, Claude…).
 
