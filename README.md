@@ -1,87 +1,89 @@
 # EatMate 🥗
 
-**Seu diário alimentar simples — sem contar calorias.**
+**Your simple food diary — no calorie counting.**
 
-🌍 **Português** · [English](README.en.md) · [Español](README.es.md) · [Deutsch](README.de.md) · [Français](README.fr.md) · [Italiano](README.it.md)
+🌍 **English** · [Português](README.pt.md) · [Español](README.es.md) · [Deutsch](README.de.md) · [Français](README.fr.md) · [Italiano](README.it.md)
 
-Anote o que você comeu do jeito que você fala — _"tomei café com leite e comi 2 torradas"_ — e o EatMate entende sozinho. Depois de 7 dias aparece um **termômetro** com a nota da sua alimentação, de **A a E** (no estilo do Nutri-Score), e um **relatório completo** para mostrar ao seu nutricionista ou colar em uma IA (ChatGPT, Gemini, Claude…) e pedir dicas.
+Write down what you ate the way you'd say it — _"a cup of coffee and two slices of toast"_ — and EatMate figures out the foods on its own. After 7 days a **thermometer** shows the quality of your diet as a grade from **A to E** (Nutri-Score style), plus a **full report** you can show your dietitian or paste into an AI (ChatGPT, Gemini, Claude…) to ask for tips.
 
-## 👉 Abrir o EatMate
+## 👉 Open EatMate
 
 ### **[malonefreak.github.io/EatMate](https://malonefreak.github.io/EatMate/)**
 
-É só abrir o link no celular ou no computador. **Não precisa baixar nada da loja, criar conta nem pagar.** Depois da primeira vez, funciona até sem internet.
+Just open the link on your phone or computer. **Nothing to download from an app store, no account, no payment.** After the first visit it even works offline.
 
-|                                         Início                                          |                                            Registro                                            |                                   Relatório                                    |                                   Histórico                                    |
-| :-------------------------------------------------------------------------------------: | :--------------------------------------------------------------------------------------------: | :----------------------------------------------------------------------------: | :----------------------------------------------------------------------------: |
-| <img src="docs/screenshots/inicio.png" width="200" alt="Tela inicial com o termômetro"> | <img src="docs/screenshots/registro.png" width="200" alt="Registro de refeição com sugestões"> | <img src="docs/screenshots/relatorio.png" width="200" alt="Relatório semanal"> | <img src="docs/screenshots/historico.png" width="200" alt="Histórico de dias"> |
+|                                            Home                                            |                                        Logging a meal                                        |                                   Report                                   |                                   History                                    |
+| :----------------------------------------------------------------------------------------: | :------------------------------------------------------------------------------------------: | :------------------------------------------------------------------------: | :--------------------------------------------------------------------------: |
+| <img src="docs/screenshots/inicio.png" width="200" alt="Home screen with the thermometer"> | <img src="docs/screenshots/registro.png" width="200" alt="Logging a meal, with suggestions"> | <img src="docs/screenshots/relatorio.png" width="200" alt="Weekly report"> | <img src="docs/screenshots/historico.png" width="200" alt="History of days"> |
 
-## 📱 Deixar na tela inicial do celular (opcional)
+_(The screenshots show the Portuguese version; the app opens in your phone's language.)_
 
-Assim o EatMate abre com um toque, como qualquer aplicativo:
+## 📱 Add it to your home screen (optional)
 
-- **Android (Chrome):** abra o link, toque no menu **⋮** e escolha **Instalar app** (ou **Adicionar à tela inicial**).
-- **iPhone (Safari):** abra o link, toque em **Compartilhar** (o quadrado com a setinha) e depois em **Adicionar à Tela de Início**.
-- **Computador (Chrome ou Edge):** clique no ícone de instalar que aparece na barra de endereço.
+That way EatMate opens with one tap, like any other app:
 
-Também dá para fazer isso pelo próprio app, em **Perfil → Instalar o app**.
+- **Android (Chrome):** open the link, tap the **⋮** menu and choose **Install app** (or **Add to Home screen**).
+- **iPhone (Safari):** open the link, tap **Share** (the square with an arrow) and then **Add to Home Screen**.
+- **Computer (Chrome or Edge):** click the install icon in the address bar.
 
-## ✍️ Como usar
+You can also do it from inside the app, in **Profile → Install the app**.
 
-1. **Diga como quer ser chamado.** Só isso — sem e-mail, sem senha.
-2. **Toque em "Registrar refeição"** e escreva o que comeu, do seu jeito: _"arroz, feijão, bife acebolado e um copo de suco de laranja"_. O app separa os alimentos, sugere enquanto você digita e mostra a nota de cada um. Dá para registrar na hora ou depois, escolhendo outro dia.
-3. **Errou alguma coisa?** No **Histórico** você vê cada dia e pode editar ou excluir qualquer refeição.
-4. **Depois de 7 dias** com registro, o **termômetro** aparece na tela inicial com a sua nota (0 a 100 e A a E).
-5. **Toque no termômetro** para ver o relatório completo: pontos positivos, pontos de atenção, frutas e verduras, ultraprocessados, regularidade das refeições e o diário de tudo o que você comeu. Use os botões para **copiar para uma IA**, **salvar em PDF** para o nutricionista ou **compartilhar** pelo WhatsApp.
-6. **Toda semana** o relatório fica guardado em **Relatórios**. Corrigiu algum dia depois? O relatório avisa que está desatualizado e você gera de novo com um toque.
+## ✍️ How to use it
 
-O app não conhece algum alimento? Ele pergunta uma vez em qual categoria ele entra e lembra para as próximas.
+1. **Tell it what to call you.** That's it — no email, no password.
+2. **Tap "Log a meal"** and write what you ate in your own words: _"chicken, rice, beans and a glass of orange juice"_. EatMate splits the foods, suggests as you type and shows each food's grade. Log right away or later, picking any past day.
+3. **Made a mistake?** In **History** you can see every day and edit or delete any meal.
+4. **After 7 days** of logging, the **thermometer** appears on the home screen with your score (0–100 and A–E).
+5. **Tap the thermometer** to open the full report: what went well, what to watch, fruits and vegetables, ultra-processed foods, meal regularity and a diary of everything you ate. Use the buttons to **copy it for an AI**, **save it as a PDF** for your dietitian or **share** it on WhatsApp.
+6. **Every week** the report is saved under **Reports**. Fixed a day afterwards? The report tells you it's out of date and you can generate it again with one tap.
 
-## 🌍 Idiomas
+Doesn't recognize a food? It asks once which category it belongs to and remembers it for next time.
 
-O EatMate fala **português, inglês, espanhol, alemão, francês e italiano**. Ele abre no idioma do seu celular, e você pode trocar quando quiser em **Perfil → Idioma**. Os nomes dos alimentos também mudam: em inglês ele entende _"a cup of coffee and two slices of toast"_; em alemão, _"zwei Scheiben Vollkornbrot"_; em espanhol, _"un vaso de zumo de naranja"_.
+## 🌍 Languages
 
-## 🔒 Seus dados são só seus
+EatMate speaks **Portuguese, English, Spanish, German, French and Italian**. It opens in your phone's language, and you can switch anytime in **Profile → Language**. The food names change too: in English it understands _"a cup of coffee and two slices of toast"_; in German, _"zwei Scheiben Vollkornbrot"_; in Spanish, _"un vaso de zumo de naranja"_.
 
-- Não tem cadastro, servidor, propaganda nem rastreador.
-- Tudo o que você registra fica **guardado só no seu aparelho**.
-- O relatório só sai do aparelho quando **você** copia, compartilha ou salva.
-- Vai trocar de celular? Em **Perfil → Exportar backup** você salva um arquivo; no celular novo, toque em **Restaurar backup** na tela de boas-vindas (ou em **Perfil → Importar backup**).
+## 🔒 Your data stays yours
 
-## 🌡️ Como a nota é calculada
+- No sign-up, no server, no ads, no trackers.
+- Everything you log is **stored only on your device**.
+- A report only leaves your device when **you** copy, share or save it.
+- Switching phones? In **Profile → Export backup** you save a file; on the new phone, tap **Restore a backup** on the welcome screen (or **Profile → Import backup**).
 
-Cada alimento tem uma nota de **A** (melhor) a **E**, inspirada no [Nutri-Score](https://www.santepubliquefrance.fr/en/nutri-score), e um grau de processamento segundo o [Guia Alimentar para a População Brasileira](https://www.gov.br/saude/pt-br/assuntos/saude-brasil/publicacoes-para-promocao-a-saude/guia_alimentar_populacao_brasileira_2ed.pdf) (in natura, processados e ultraprocessados). A nota da semana combina:
+## 🌡️ How the grade is calculated
 
-| O que conta                                          | Peso |
-| ---------------------------------------------------- | ---- |
-| Qualidade dos alimentos (média das notas A–E)        | 40%  |
-| Menos ultraprocessados, mais comida de verdade       | 20%  |
-| Frutas, verduras e legumes (meta: 5 porções por dia) | 20%  |
-| Variedade de alimentos bons                          | 10%  |
-| Café da manhã, almoço e jantar com regularidade      | 10%  |
+Each food has a grade from **A** (best) to **E**, inspired by the [Nutri-Score](https://www.santepubliquefrance.fr/en/nutri-score), and a degree of processing based on the [Dietary Guidelines for the Brazilian Population](https://www.gov.br/saude/pt-br/assuntos/saude-brasil/publicacoes-para-promocao-a-saude/guia_alimentar_populacao_brasileira_2ed.pdf) (unprocessed, processed and ultra-processed; the guide is in Portuguese). The weekly score combines:
 
-**A** a partir de 85 pontos, **B** a partir de 70, **C** a partir de 55, **D** a partir de 40 e **E** abaixo disso.
+| What counts                                      | Weight |
+| ------------------------------------------------ | ------ |
+| Quality of the foods (average of the A–E grades) | 40%    |
+| Fewer ultra-processed foods, more real food      | 20%    |
+| Fruits and vegetables (goal: 5 servings a day)   | 20%    |
+| Variety of good-quality foods                    | 10%    |
+| Regular breakfast, lunch and dinner              | 10%    |
 
-> ⚠️ As notas são estimativas para ajudar você a perceber padrões. O EatMate não substitui a orientação de um(a) nutricionista.
+**A** from 85 points, **B** from 70, **C** from 55, **D** from 40 and **E** below that.
 
-## ❓ Perguntas frequentes
+> ⚠️ The grades are estimates to help you notice patterns. EatMate does not replace advice from a dietitian.
 
-**É pago?** Não, é gratuito.
+## ❓ FAQ
 
-**Precisa de internet?** Só para abrir pela primeira vez (e para receber atualizações). Depois funciona offline.
+**Does it cost anything?** No, it's free.
 
-**É um app de dieta ou de contar calorias?** Não. A ideia é perceber a **qualidade** do que você come ao longo da semana, sem pesar comida nem contar calorias.
+**Do I need internet?** Only to open it for the first time (and to receive updates). After that it works offline.
 
-**Vou perder meus registros quando o app atualizar?** Não. Atualizar só troca o app; seus registros continuam no aparelho. Além do banco do navegador, o EatMate guarda uma cópia de segurança automática de tudo o que você registra e repõe o que faltar ao abrir.
+**Is it a diet or calorie-counting app?** No. The idea is to notice the **quality** of what you eat over the week, without weighing food or counting calories.
 
-**No iPhone, meus registros sumiram depois que coloquei o app na tela inicial.** O iPhone guarda separadamente os dados do Safari e os do app na tela inicial. Use sempre o mesmo (de preferência o da tela inicial). Para levar os registros de um para o outro, use **Perfil → Exportar backup** num e **Importar backup** no outro.
+**Will I lose my entries when the app updates?** No. An update only replaces the app; your entries stay on your device. Besides the browser's database, EatMate keeps an automatic backup copy of everything you log and restores anything that's missing when it opens.
 
-**Apaguei o app / limpei o navegador. Perdi tudo?** Os dados ficam no navegador do aparelho, então limpar os dados do navegador apaga os registros. Por isso vale exportar um backup de vez em quando (o app mostra a data do último).
+**On iPhone, my entries disappeared after I added the app to my home screen.** iPhone keeps the data of Safari and the data of the home-screen app separate. Always use the same one (preferably the home-screen app). To move your entries from one to the other, use **Profile → Export backup** in one and **Import backup** in the other.
 
-**Como fico sabendo de uma versão nova?** O app avisa sozinho: aparece "Nova versão disponível" com o botão **Atualizar**. As novidades de cada versão ficam em [Releases](https://github.com/MaloneFreak/EatMate/releases) e no [histórico de mudanças](CHANGELOG.md).
+**I deleted the app / cleared my browser. Did I lose everything?** The data lives in your device's browser, so clearing the browser's data deletes your entries. That's why it's worth exporting a backup now and then (the app shows the date of the last one).
 
-**Encontrei um problema ou tenho uma ideia.** Abra uma [issue](https://github.com/MaloneFreak/EatMate/issues) contando o que aconteceu.
+**How do I find out about a new version?** The app tells you by itself: "New version available" appears with an **Update** button. What's new in each version is listed under [Releases](https://github.com/MaloneFreak/EatMate/releases) and in the [changelog](CHANGELOG.md) (in Portuguese).
 
-## 🛠️ Para quem desenvolve
+**I found a problem or have an idea.** Open an [issue](https://github.com/MaloneFreak/EatMate/issues) and tell me what happened.
 
-O EatMate é um app web (PWA) feito com React e TypeScript, sem servidor. Como rodar no computador, testar, publicar e criar uma nova versão está em [docs/DESENVOLVIMENTO.md](docs/DESENVOLVIMENTO.md).
+## 🛠️ For developers
+
+EatMate is a web app (PWA) built with React and TypeScript, with no server. How to run it on your computer, test it, publish it and create a new version is covered in [docs/DESENVOLVIMENTO.md](docs/DESENVOLVIMENTO.md) (in Portuguese).

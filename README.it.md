@@ -2,7 +2,7 @@
 
 **Il tuo diario alimentare semplice — senza contare le calorie.**
 
-🌍 [Português](README.md) · [English](README.en.md) · [Español](README.es.md) · [Deutsch](README.de.md) · [Français](README.fr.md) · **Italiano**
+🌍 [English](README.md) · [Português](README.pt.md) · [Español](README.es.md) · [Deutsch](README.de.md) · [Français](README.fr.md) · **Italiano**
 
 Scrivi cosa hai mangiato come lo diresti — _"un cappuccino e due fette biscottate"_ — ed EatMate riconosce gli alimenti da solo. Dopo 7 giorni compare un **termometro** con la qualità della tua alimentazione, con un voto dalla **A alla E** (in stile Nutri-Score), e un **report completo** da mostrare al tuo nutrizionista o da incollare in un'IA (ChatGPT, Gemini, Claude…) per ricevere consigli.
 

@@ -2,7 +2,7 @@
 
 **Votre journal alimentaire tout simple — sans compter les calories.**
 
-🌍 [Português](README.md) · [English](README.en.md) · [Español](README.es.md) · [Deutsch](README.de.md) · **Français** · [Italiano](README.it.md)
+🌍 [English](README.md) · [Português](README.pt.md) · [Español](README.es.md) · [Deutsch](README.de.md) · **Français** · [Italiano](README.it.md)
 
 Notez ce que vous avez mangé comme vous le diriez — _« un café au lait et deux tartines »_ — et EatMate reconnaît les aliments tout seul. Au bout de 7 jours, un **thermomètre** affiche la qualité de votre alimentation avec une note de **A à E** (façon Nutri-Score), ainsi qu’un **rapport complet** à montrer à votre diététicien·ne ou à coller dans une IA (ChatGPT, Gemini, Claude…) pour obtenir des conseils.
 
