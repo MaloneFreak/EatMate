@@ -3,8 +3,9 @@ import { writeFile } from 'node:fs/promises';
 import { tmpdir } from 'node:os';
 import path from 'node:path';
 import { buildDemoMeals } from '../src/domain/demo';
-import { FoodIndex } from '../src/domain/foodIndex';
 import { addDays } from '../src/domain/dates';
+import { FoodIndex } from '../src/domain/foodIndex';
+import type { Language } from '../src/domain/language';
 
 export const TIME_ZONE = 'America/Sao_Paulo';
 
@@ -13,11 +14,15 @@ export function todayInTimeZone(): string {
   return new Intl.DateTimeFormat('en-CA', { timeZone: TIME_ZONE }).format(new Date());
 }
 
-/** Cria um arquivo de backup com `weeks` semanas de refeições, terminando ontem. */
+/**
+ * Cria um arquivo de backup com `weeks` semanas de refeições, terminando ontem.
+ * Os nomes dos alimentos ficam no idioma pedido (o backup guarda o nome como texto).
+ */
 export async function writeDemoBackup(
   weeks = 2,
+  language: Language = 'pt',
 ): Promise<{ file: string; firstDay: string; lastDay: string }> {
-  const index = new FoodIndex();
+  const index = new FoodIndex([], language);
   const lastDay = addDays(todayInTimeZone(), -1);
   const meals = Array.from({ length: weeks }, (_, w) =>
     buildDemoMeals(addDays(lastDay, -7 * w), index).map((meal) => ({

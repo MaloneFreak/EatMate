@@ -12,11 +12,9 @@ Write down what you ate the way you'd say it — _"a cup of coffee and two slice
 
 Just open the link on your phone or computer. **Nothing to download from an app store, no account, no payment.** After the first visit it even works offline.
 
-|                                            Home                                            |                                        Logging a meal                                        |                                   Report                                   |                                   History                                    |
-| :----------------------------------------------------------------------------------------: | :------------------------------------------------------------------------------------------: | :------------------------------------------------------------------------: | :--------------------------------------------------------------------------: |
-| <img src="docs/screenshots/inicio.png" width="200" alt="Home screen with the thermometer"> | <img src="docs/screenshots/registro.png" width="200" alt="Logging a meal, with suggestions"> | <img src="docs/screenshots/relatorio.png" width="200" alt="Weekly report"> | <img src="docs/screenshots/historico.png" width="200" alt="History of days"> |
-
-_(The screenshots show the Portuguese version; the app opens in your phone's language.)_
+|                                               Home                                               |                                            Logging a meal                                            |                                   Report                                   |                                    History                                    |
+| :----------------------------------------------------------------------------------------------: | :--------------------------------------------------------------------------------------------------: | :------------------------------------------------------------------------: | :---------------------------------------------------------------------------: |
+| <img src="docs/screenshots/en/home.png" width="200" alt="Home screen with the diet thermometer"> | <img src="docs/screenshots/en/log-meal.png" width="200" alt="Logging a meal, with food suggestions"> | <img src="docs/screenshots/en/report.png" width="200" alt="Weekly report"> | <img src="docs/screenshots/en/history.png" width="200" alt="History of days"> |
 
 ## 📱 Add it to your home screen (optional)
 

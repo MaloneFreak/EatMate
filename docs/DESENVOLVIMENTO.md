@@ -11,15 +11,16 @@ npm install
 npm run dev        # abre em http://localhost:5173
 ```
 
-| Comando                                                 | O que faz                                                                                                   |
-| ------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------- |
-| `npm run build`                                         | gera a versão final em `dist/`                                                                              |
-| `npm run preview`                                       | serve a versão final localmente                                                                             |
-| `npm test`                                              | testes unitários (Vitest)                                                                                   |
-| `npm run test:e2e`                                      | testes de ponta a ponta no navegador (Playwright) — na primeira vez, rode `npx playwright install chromium` |
-| `npm run lint` / `npm run typecheck` / `npm run format` | qualidade do código                                                                                         |
-| `npm run icons`                                         | gera os ícones PNG a partir do desenho em SVG                                                               |
-| `SCREENSHOTS_DIR=./capturas npm run screenshots`        | tira capturas de todas as telas com dados de exemplo                                                        |
+| Comando                                                                         | O que faz                                                                                                    |
+| ------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------ |
+| `npm run build`                                                                 | gera a versão final em `dist/`                                                                               |
+| `npm run preview`                                                               | serve a versão final localmente                                                                              |
+| `npm test`                                                                      | testes unitários (Vitest)                                                                                    |
+| `npm run test:e2e`                                                              | testes de ponta a ponta no navegador (Playwright) — na primeira vez, rode `npx playwright install chromium`  |
+| `npm run lint` / `npm run typecheck` / `npm run format`                         | qualidade do código                                                                                          |
+| `npm run icons`                                                                 | gera os ícones PNG a partir do desenho em SVG                                                                |
+| `SCREENSHOTS_DIR=./capturas npm run screenshots`                                | tira capturas de todas as telas com dados de exemplo                                                         |
+| `README_SHOTS_DIR=docs/screenshots/en README_SHOTS_LANG=en npm run screenshots` | refaz as 4 capturas do README (início, registro, relatório e histórico) em inglês (`en`) ou português (`pt`) |
 
 ## Como o projeto está organizado
 
