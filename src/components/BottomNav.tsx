@@ -13,22 +13,22 @@ export function BottomNav() {
     <nav className="bottom-nav" aria-label={t.nav.label}>
       <NavLink to="/" end className={linkClass}>
         <House size={22} aria-hidden="true" />
-        {t.nav.home}
+        <span className="nav-label">{t.nav.home}</span>
       </NavLink>
       <NavLink to="/historico" className={linkClass}>
         <CalendarDays size={22} aria-hidden="true" />
-        {t.nav.history}
+        <span className="nav-label">{t.nav.history}</span>
       </NavLink>
       <NavLink to="/registrar" className="nav-add" aria-label={t.nav.add}>
         <Plus size={28} strokeWidth={2.6} aria-hidden="true" />
       </NavLink>
       <NavLink to="/relatorios" className={() => linkClass({ isActive: onReports })}>
         <FileText size={22} aria-hidden="true" />
-        {t.nav.reports}
+        <span className="nav-label">{t.nav.reports}</span>
       </NavLink>
       <NavLink to="/perfil" className={linkClass}>
         <User size={22} aria-hidden="true" />
-        {t.nav.profile}
+        <span className="nav-label">{t.nav.profile}</span>
       </NavLink>
     </nav>
   );
