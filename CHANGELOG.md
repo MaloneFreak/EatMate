@@ -2,6 +2,23 @@
 
 Todas as mudanças importantes do EatMate ficam registradas aqui. As versões seguem o [versionamento semântico](https://semver.org/lang/pt-BR/).
 
+## [Não lançado]
+
+### Melhorias
+
+- **O app abre mais rápido.** A primeira abertura baixa só o idioma escolhido, não os seis; relatórios e perfil são baixados quando abertos pela primeira vez. As bibliotecas ficam num arquivo à parte, que continua em cache entre as versões. Tudo segue funcionando sem internet.
+- **Telas estreitas:** a escala de notas do relatório não passa mais da borda em celulares de 320 px, a data do registro não fica cortada (a hora desce para a linha de baixo), e títulos e rótulos da barra de navegação se ajustam à largura da tela.
+- Campos em foco não ficam escondidos atrás da barra de navegação.
+- O app instalado pode girar para a horizontal (tablets e Chromebooks).
+
+### Segurança
+
+- **Backup importado com limites:** arquivos acima de 20 MB ou com registros demais são recusados antes de travar o aparelho; nomes, observações e apelidos longos são cortados; marcações desconhecidas e campos extras são descartados.
+- **Cópia de segurança local sem estourar:** quando o armazenamento do navegador enche, a cópia passa a guardar só os últimos 60 dias, em vez de parar de proteger os registros.
+- Política de segurança de conteúdo (CSP): o app só carrega scripts, estilos, fontes e imagens do próprio site.
+- O app não abre dentro de um iframe de outro site (proteção contra clickjacking).
+- As GitHub Actions ficam fixadas pelo SHA do commit, o CI verifica vulnerabilidades conhecidas nas dependências e o Dependabot mantém tudo atualizado.
+
 ## [1.0.2] - 2026-10-18
 
 ### Correções
