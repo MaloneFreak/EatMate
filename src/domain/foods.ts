@@ -383,6 +383,7 @@ export function localizedFoods(language: Language): Food[] {
   let foods = localized.get(language);
   if (!foods) {
     const names = FOOD_NAMES[language as Exclude<Language, 'pt'>];
+    if (!names) throw new Error(`Nomes dos alimentos em "${language}" ainda não carregados`);
     foods = BUILTIN_FOODS.map((f) => {
       const [name, ...aliases] = names[f.id] ?? [f.name, ...(f.aliases ?? [])];
       return { ...f, name, aliases };

@@ -5,10 +5,10 @@ import { FoodIndex } from './foodIndex';
 import { buildReport } from './report';
 import type { Meal } from './types';
 import { createFormat } from '../i18n/format';
-import { MESSAGES } from '../i18n/messages';
+import { messagesFor } from '../i18n/messages';
 
 const index = new FoodIndex();
-const pt = { t: MESSAGES.pt, f: createFormat('pt-BR'), index };
+const pt = { t: messagesFor('pt'), f: createFormat('pt-BR'), index };
 const period = { start: '2026-10-12', end: '2026-10-18' };
 
 describe('buildReport', () => {
@@ -125,10 +125,14 @@ it('gera o texto no idioma escolhido', () => {
     period,
     profileName: '',
   });
-  const md = reportToMarkdown(data, { t: MESSAGES.en, f: createFormat('en-US'), index: en });
+  const md = reportToMarkdown(data, { t: messagesFor('en'), f: createFormat('en-US'), index: en });
   expect(md).toContain('Brown rice');
   const de = new FoodIndex([], 'de');
-  const deMd = reportToMarkdown(data, { t: MESSAGES.de, f: createFormat('de-DE'), index: de });
+  const deMd = reportToMarkdown(data, {
+    t: messagesFor('de'),
+    f: createFormat('de-DE'),
+    index: de,
+  });
   expect(deMd).toContain('Nachmittagssnack');
   expect(deMd).not.toContain('\u00ad');
   const same = buildReport({

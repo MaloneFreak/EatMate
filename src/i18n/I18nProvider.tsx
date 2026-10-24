@@ -1,14 +1,16 @@
-import { createContext, useContext, useEffect, useMemo, useState, type ReactNode } from 'react';
+import {
+  createContext,
+  useContext,
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+  type ReactNode,
+} from 'react';
 import type { Language } from '../domain/language';
 import { createFormat, type Format } from './format';
-import {
-  LANGUAGE_INFO,
-  detectLanguage,
-  getStoredLanguage,
-  localeFor,
-  storeLanguage,
-} from './languages';
-import { MESSAGES, type Messages } from './messages';
+import { LANGUAGE_INFO, localeFor, startupLanguage, storeLanguage } from './languages';
+import { loadLanguage, messagesFor, type Messages } from './messages';
 
 export interface I18n {
   language: Language;
@@ -22,11 +24,14 @@ export interface I18n {
 const I18nContext = createContext<I18n>({
   language: 'pt',
   setLanguage: () => {},
-  t: MESSAGES.pt,
+  t: messagesFor('pt'),
   f: createFormat(LANGUAGE_INFO.pt.locale),
 });
 
-/** Idioma do app: o escolhido no Perfil ou, na primeira vez, o do aparelho. */
+/**
+ * Idioma do app. O idioma inicial precisa estar carregado antes (ver `main.tsx`);
+ * ao trocar, os textos do novo idioma são baixados e a tela só muda quando chegam.
+ */
 export function I18nProvider({
   children,
   initialLanguage,
@@ -35,8 +40,12 @@ export function I18nProvider({
   initialLanguage?: Language;
 }) {
   const [language, setLanguageState] = useState<Language>(
-    () => initialLanguage ?? getStoredLanguage() ?? detectLanguage(),
+    () => initialLanguage ?? startupLanguage(),
   );
+
+  // Último idioma pedido: se a pessoa trocar duas vezes seguidas, vale o último, mesmo
+  // que o anterior termine de baixar depois.
+  const requested = useRef(language);
 
   useEffect(() => {
     document.documentElement.lang = LANGUAGE_INFO[language].locale;
@@ -46,10 +55,17 @@ export function I18nProvider({
     () => ({
       language,
       setLanguage: (next) => {
-        storeLanguage(next);
-        setLanguageState(next);
+        requested.current = next;
+        loadLanguage(next).then(
+          () => {
+            if (requested.current !== next) return;
+            storeLanguage(next);
+            setLanguageState(next);
+          },
+          (error: unknown) => console.warn(`Não foi possível carregar o idioma "${next}"`, error),
+        );
       },
-      t: MESSAGES[language],
+      t: messagesFor(language),
       f: createFormat(localeFor(language)),
     }),
     [language],
