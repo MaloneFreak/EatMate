@@ -14,7 +14,7 @@ import {
   exportBackup,
   importBackup,
   markBackupDone,
-  parseBackup,
+  readBackupFile,
 } from '../data/backup';
 import { useData } from '../data/DataProvider';
 import { classifyFood, clearAllData, deleteCustomFood, saveProfileName } from '../data/repo';
@@ -66,7 +66,7 @@ export function ProfileScreen() {
     event.target.value = '';
     if (!file) return;
     try {
-      const backup = parseBackup(await file.text());
+      const backup = await readBackupFile(file);
       const ok = await confirm({
         title: p.importTitle,
         message: p.importMessage(backup.meals.length, backup.reports.length),

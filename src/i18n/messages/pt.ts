@@ -578,6 +578,7 @@ export const pt = {
   backup: {
     invalidJson: 'O arquivo não é um backup válido do EatMate (JSON inválido).',
     notEatmate: 'Este arquivo não parece ser um backup do EatMate.',
+    tooLarge: 'O arquivo é grande demais para ser um backup do EatMate.',
     readError: 'Não foi possível ler o arquivo.',
     importError: 'Não foi possível importar o arquivo.',
   },

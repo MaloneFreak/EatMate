@@ -4,7 +4,7 @@ import { useNavigate } from 'react-router';
 import { Logo } from '../components/Logo';
 import { useToast } from '../components/Toast';
 import { LanguagePicker } from '../components/LanguagePicker';
-import { BackupError, importBackup, parseBackup } from '../data/backup';
+import { BackupError, importBackup, readBackupFile } from '../data/backup';
 import { requestPersistentStorage, saveProfileName } from '../data/repo';
 import { useI18n } from '../i18n/I18nProvider';
 
@@ -26,7 +26,7 @@ export function OnboardingScreen() {
     event.target.value = '';
     if (!file) return;
     try {
-      const backup = parseBackup(await file.text());
+      const backup = await readBackupFile(file);
       const summary = await importBackup(backup);
       void requestPersistentStorage();
       toast(o.restored(summary.meals));

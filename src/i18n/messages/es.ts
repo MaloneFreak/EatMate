@@ -586,6 +586,7 @@ export const es: Messages = {
   backup: {
     invalidJson: 'El archivo no es una copia de seguridad válida de EatMate (JSON no válido).',
     notEatmate: 'Este archivo no parece ser una copia de seguridad de EatMate.',
+    tooLarge: 'El archivo es demasiado grande para ser una copia de seguridad de EatMate.',
     readError: 'No se pudo leer el archivo.',
     importError: 'No se pudo importar el archivo.',
   },

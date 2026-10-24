@@ -2,7 +2,7 @@ import { isValidISODate } from '../domain/dates';
 import { isGrade, isNova } from '../domain/grades';
 import { isFoodGroup } from '../domain/groups';
 import { isMealType } from '../domain/meals';
-import type { AppSettings, CustomFood, Meal, Profile, SavedReport } from '../domain/types';
+import type { AppSettings, CustomFood, FoodTag, Meal, Profile, SavedReport } from '../domain/types';
 import { db, uid } from './db';
 import { mirrorSaveFoods, mirrorSaveMeals, mirrorSaveProfile, readMirror } from './mirror';
 import { getProfile, getSettings, migrateReports, updateSettings } from './repo';
@@ -18,9 +18,32 @@ export interface BackupFile {
   reports: SavedReport[];
 }
 
+/**
+ * Limites de um backup. Ficam bem acima do que o app grava (o nome tem até 40 letras,
+ * as observações até 500) e de anos de uso, mas impedem que um arquivo malicioso ou
+ * corrompido trave o aparelho, encha o armazenamento ou quebre o layout.
+ */
+export const BACKUP_LIMITS = {
+  /** Tamanho do arquivo: um ano de registros dá menos de 2 MB. */
+  fileBytes: 20 * 1024 * 1024,
+  meals: 50_000,
+  itemsPerMeal: 100,
+  customFoods: 5_000,
+  aliases: 50,
+  reports: 5_000,
+  dismissedPeriods: 5_000,
+  /** Identificadores (o app usa UUIDs, com 36 caracteres). */
+  id: 100,
+  /** Nome do perfil. */
+  name: 60,
+  /** Nomes de alimentos, apelidos e quantidades. */
+  text: 200,
+  notes: 2_000,
+} as const;
+
 /** Erro ao ler um arquivo de backup; `code` escolhe a mensagem no idioma do app. */
 export class BackupError extends Error {
-  constructor(readonly code: 'invalidJson' | 'notEatmate') {
+  constructor(readonly code: 'invalidJson' | 'notEatmate' | 'tooLarge') {
     super(code);
     this.name = 'BackupError';
   }
@@ -55,6 +78,16 @@ export async function exportBackup(): Promise<BackupFile> {
 const isObject = (v: unknown): v is Record<string, unknown> =>
   typeof v === 'object' && v !== null && !Array.isArray(v);
 const str = (v: unknown) => (typeof v === 'string' ? v : undefined);
+/** Texto aparado e cortado no tamanho máximo (ou `undefined`, se vazio). */
+const clip = (v: unknown, max: number = BACKUP_LIMITS.text) => {
+  const value = str(v)?.trim().slice(0, max).trim();
+  return value ? value : undefined;
+};
+/** Identificador do arquivo, se for razoável (senão quem chama gera um novo). */
+const id = (v: unknown) => {
+  const value = str(v);
+  return value && value.length <= BACKUP_LIMITS.id ? value : undefined;
+};
 const num = (v: unknown) => (typeof v === 'number' && Number.isFinite(v) ? v : undefined);
 
 function sanitizeMeal(raw: unknown): Meal | undefined {
@@ -62,43 +95,64 @@ function sanitizeMeal(raw: unknown): Meal | undefined {
   const date = str(raw.date);
   if (!date || !isValidISODate(date) || !isMealType(raw.type) || !Array.isArray(raw.items))
     return undefined;
-  const items = raw.items.flatMap((item) => {
-    if (!isObject(item) || !str(item.name)?.trim()) return [];
+  const items = raw.items.slice(0, BACKUP_LIMITS.itemsPerMeal).flatMap((item) => {
+    const name = isObject(item) ? clip(item.name) : undefined;
+    if (!isObject(item) || !name) return [];
+    const quantity = clip(item.quantity);
+    const foodId = id(item.foodId);
     return [
       {
-        id: str(item.id) ?? uid(),
-        name: str(item.name)!.trim(),
-        ...(str(item.quantity) ? { quantity: str(item.quantity) } : {}),
-        ...(str(item.foodId) ? { foodId: str(item.foodId) } : {}),
+        id: id(item.id) ?? uid(),
+        name,
+        ...(quantity ? { quantity } : {}),
+        ...(foodId ? { foodId } : {}),
       },
     ];
   });
   const time = str(raw.time);
+  const notes = clip(raw.notes, BACKUP_LIMITS.notes);
   return {
-    id: str(raw.id) ?? uid(),
+    id: id(raw.id) ?? uid(),
     date,
     type: raw.type,
     ...(time && /^\d{2}:\d{2}$/.test(time) ? { time } : {}),
-    ...(str(raw.notes) ? { notes: str(raw.notes) } : {}),
+    ...(notes ? { notes } : {}),
     items,
     createdAt: num(raw.createdAt) ?? Date.now(),
     updatedAt: num(raw.updatedAt) ?? Date.now(),
   };
 }
 
+/** Todas as marcações de alimento (o `Record` obriga a lista a acompanhar o tipo). */
+const FOOD_TAGS: Record<FoodTag, true> = {
+  agua: true,
+  embutido: true,
+  adocada: true,
+  salgadinho: true,
+  integral: true,
+};
+const isFoodTag = (v: unknown): v is FoodTag =>
+  typeof v === 'string' && Object.hasOwn(FOOD_TAGS, v);
+
 function sanitizeCustomFood(raw: unknown): CustomFood | undefined {
-  if (!isObject(raw) || !str(raw.id) || !str(raw.name)) return undefined;
+  if (!isObject(raw)) return undefined;
+  const foodId = id(raw.id);
+  const name = clip(raw.name);
+  if (!foodId || !name) return undefined;
   if (!isFoodGroup(raw.group) || !isGrade(raw.grade) || !isNova(raw.nova)) return undefined;
   return {
-    id: str(raw.id)!,
-    name: str(raw.name)!,
+    id: foodId,
+    name,
     group: raw.group,
     grade: raw.grade,
     nova: raw.nova,
     aliases: Array.isArray(raw.aliases)
-      ? raw.aliases.filter((a): a is string => typeof a === 'string')
+      ? raw.aliases
+          .slice(0, BACKUP_LIMITS.aliases)
+          .map((alias) => clip(alias))
+          .filter((alias): alias is string => !!alias)
       : [],
-    ...(Array.isArray(raw.tags) ? { tags: raw.tags as CustomFood['tags'] } : {}),
+    ...(Array.isArray(raw.tags) ? { tags: [...new Set(raw.tags.filter(isFoodTag))] } : {}),
     custom: true,
     createdAt: num(raw.createdAt) ?? Date.now(),
   };
@@ -170,13 +224,34 @@ function isReportData(d: Record<string, unknown>): boolean {
 }
 
 function sanitizeReport(raw: unknown): SavedReport | undefined {
-  if (!isObject(raw) || !str(raw.id) || !isObject(raw.data)) return undefined;
+  if (!isObject(raw) || !id(raw.id) || !isObject(raw.data)) return undefined;
   if (raw.kind !== 'semanal' && raw.kind !== 'personalizado') return undefined;
   if (!isDate(raw.startDate) || !isDate(raw.endDate) || !isNumber(raw.generatedAt))
     return undefined;
-  if (typeof raw.fingerprint !== 'string' || !isReportData(raw.data)) return undefined;
-  return raw as unknown as SavedReport;
+  if (typeof raw.fingerprint !== 'string' || raw.fingerprint.length > BACKUP_LIMITS.notes)
+    return undefined;
+  if (!isReportData(raw.data)) return undefined;
+  // Só os campos conhecidos: o que mais vier no arquivo não vai para o banco.
+  const data = raw.data as unknown as SavedReport['data'];
+  return {
+    id: raw.id as string,
+    kind: raw.kind,
+    ...(isNumber(raw.weekNumber) ? { weekNumber: raw.weekNumber } : {}),
+    startDate: raw.startDate as string,
+    endDate: raw.endDate as string,
+    generatedAt: raw.generatedAt,
+    fingerprint: raw.fingerprint,
+    data: { ...data, profileName: data.profileName.slice(0, BACKUP_LIMITS.name) },
+  };
 }
+
+/** Recusa arquivos grandes demais antes de lê-los (um arquivo enorme travaria o aparelho). */
+export async function readBackupFile(file: Blob): Promise<BackupFile> {
+  if (file.size > BACKUP_LIMITS.fileBytes) throw new BackupError('tooLarge');
+  return parseBackup(await file.text());
+}
+
+const tooMany = (v: unknown, max: number) => Array.isArray(v) && v.length > max;
 
 /** Lê e valida o conteúdo de um arquivo de backup. Lança um `BackupError` se for inválido. */
 export function parseBackup(text: string): BackupFile {
@@ -189,15 +264,29 @@ export function parseBackup(text: string): BackupFile {
   if (!isObject(data) || data.app !== 'eatmate' || !Array.isArray(data.meals)) {
     throw new BackupError('notEatmate');
   }
+  if (
+    tooMany(data.meals, BACKUP_LIMITS.meals) ||
+    tooMany(data.customFoods, BACKUP_LIMITS.customFoods) ||
+    tooMany(data.reports, BACKUP_LIMITS.reports)
+  ) {
+    throw new BackupError('tooLarge');
+  }
+  const profileName = isObject(data.profile)
+    ? clip(data.profile.name, BACKUP_LIMITS.name)
+    : undefined;
   const profile =
-    isObject(data.profile) && str(data.profile.name)
-      ? { name: str(data.profile.name)!, createdAt: num(data.profile.createdAt) ?? Date.now() }
+    isObject(data.profile) && profileName
+      ? { name: profileName, createdAt: num(data.profile.createdAt) ?? Date.now() }
       : undefined;
   const settings = isObject(data.settings)
     ? {
-        ...(str(data.settings.weekAnchor) ? { weekAnchor: str(data.settings.weekAnchor) } : {}),
+        ...(isDate(data.settings.weekAnchor)
+          ? { weekAnchor: data.settings.weekAnchor as string }
+          : {}),
         dismissedPeriods: Array.isArray(data.settings.dismissedPeriods)
-          ? data.settings.dismissedPeriods.filter((p): p is string => typeof p === 'string')
+          ? data.settings.dismissedPeriods
+              .slice(0, BACKUP_LIMITS.dismissedPeriods)
+              .filter((p): p is string => typeof p === 'string' && p.length <= BACKUP_LIMITS.id)
           : [],
       }
     : undefined;
