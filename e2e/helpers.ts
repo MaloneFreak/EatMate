@@ -6,6 +6,7 @@ import { buildDemoMeals } from '../src/domain/demo';
 import { addDays } from '../src/domain/dates';
 import { FoodIndex } from '../src/domain/foodIndex';
 import type { Language } from '../src/domain/language';
+import { loadLanguage } from '../src/i18n/messages';
 
 export const TIME_ZONE = 'America/Sao_Paulo';
 
@@ -22,6 +23,7 @@ export async function writeDemoBackup(
   weeks = 2,
   language: Language = 'pt',
 ): Promise<{ file: string; firstDay: string; lastDay: string }> {
+  await loadLanguage(language);
   const index = new FoodIndex([], language);
   const lastDay = addDays(todayInTimeZone(), -1);
   const meals = Array.from({ length: weeks }, (_, w) =>

@@ -10,7 +10,7 @@ describe.each(LANGUAGES)('base de alimentos (%s)', (language) => {
   const { singularize } = rules;
 
   if (language !== 'pt') {
-    const names = FOOD_NAMES[language];
+    const names = FOOD_NAMES[language]!;
 
     it('traduz todos os alimentos, sem ids a mais', () => {
       const ids = new Set(BUILTIN_FOODS.map((f) => f.id));

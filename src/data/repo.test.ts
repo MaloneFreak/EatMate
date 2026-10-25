@@ -1,8 +1,15 @@
-import { beforeEach, describe, expect, it } from 'vitest';
+import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { addDays } from '../domain/dates';
 import { FoodIndex } from '../domain/foodIndex';
 import { CLASSIFY_OPTIONS } from '../domain/groups';
-import { BackupError, exportBackup, importBackup, parseBackup } from './backup';
+import {
+  BACKUP_LIMITS,
+  BackupError,
+  exportBackup,
+  importBackup,
+  parseBackup,
+  readBackupFile,
+} from './backup';
 import { db } from './db';
 import {
   classifyFood,
@@ -170,6 +177,59 @@ describe('backup', () => {
       }),
     );
     expect(parsed.meals.map((m) => m.id)).toEqual(['ok']);
+  });
+
+  it('recusa arquivos grandes demais antes de ler', async () => {
+    const file = { size: BACKUP_LIMITS.fileBytes + 1, text: vi.fn() } as unknown as Blob;
+    await expect(readBackupFile(file)).rejects.toThrow(new BackupError('tooLarge'));
+    expect(file.text).not.toHaveBeenCalled();
+  });
+
+  it('recusa backups com registros demais', () => {
+    const meals = Array.from({ length: BACKUP_LIMITS.meals + 1 }, () => ({}));
+    expect(() => parseBackup(JSON.stringify({ app: 'eatmate', meals }))).toThrow(
+      new BackupError('tooLarge'),
+    );
+  });
+
+  it('corta textos longos e descarta campos desconhecidos', () => {
+    const long = 'x'.repeat(10_000);
+    const parsed = parseBackup(
+      JSON.stringify({
+        app: 'eatmate',
+        profile: { name: long },
+        meals: [
+          {
+            id: long,
+            date: '2026-10-01',
+            type: 'almoco',
+            notes: long,
+            items: [{ name: long, quantity: long, foodId: long }],
+          },
+        ],
+        customFoods: [
+          {
+            id: 'f1',
+            name: 'Cambuci',
+            group: 'frutas',
+            grade: 'A',
+            nova: 1,
+            aliases: [long, 42],
+            tags: ['agua', 'inventada', 'agua'],
+          },
+        ],
+      }),
+    );
+    expect(parsed.profile?.name).toHaveLength(BACKUP_LIMITS.name);
+    const meal = parsed.meals[0]!;
+    expect(meal.id).not.toBe(long);
+    expect(meal.notes).toHaveLength(BACKUP_LIMITS.notes);
+    expect(meal.items[0]!.name).toHaveLength(BACKUP_LIMITS.text);
+    expect(meal.items[0]!.quantity).toHaveLength(BACKUP_LIMITS.text);
+    expect(meal.items[0]!.foodId).toBeUndefined();
+    const food = parsed.customFoods[0]!;
+    expect(food.aliases).toEqual(['x'.repeat(BACKUP_LIMITS.text)]);
+    expect(food.tags).toEqual(['agua']);
   });
 });
 

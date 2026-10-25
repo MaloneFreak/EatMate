@@ -50,4 +50,7 @@ export function storeLanguage(language: Language): void {
   }
 }
 
+/** Idioma com que o app abre: o escolhido no Perfil ou, na primeira vez, o do aparelho. */
+export const startupLanguage = (): Language => getStoredLanguage() ?? detectLanguage();
+
 export { LANGUAGES };

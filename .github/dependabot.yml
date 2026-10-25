@@ -1,0 +1,16 @@
+# Atualizações automáticas: dependências do npm e as GitHub Actions (que ficam
+# fixadas pelo SHA do commit; o Dependabot atualiza o SHA e o comentário da versão).
+version: 2
+updates:
+  - package-ecosystem: npm
+    directory: /
+    schedule:
+      interval: weekly
+    groups:
+      dependencias:
+        patterns: ['*']
+        update-types: [minor, patch]
+  - package-ecosystem: github-actions
+    directory: /
+    schedule:
+      interval: weekly

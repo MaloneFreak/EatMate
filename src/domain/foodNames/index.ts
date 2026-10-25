@@ -1,12 +1,14 @@
 import type { Language } from '../language';
-import { de } from './de';
-import { en } from './en';
-import { es } from './es';
-import { fr } from './fr';
-import { it } from './it';
 import type { FoodNames } from './types';
 
-/** Nomes da base em cada idioma (o português fica direto em `foods.ts`). */
-export const FOOD_NAMES: Record<Exclude<Language, 'pt'>, FoodNames> = { en, es, de, fr, it };
+/**
+ * Nomes da base em cada idioma (o português fica direto em `foods.ts`).
+ * São preenchidos por `loadLanguage` (i18n/messages), que baixa cada idioma sob demanda.
+ */
+export const FOOD_NAMES: Partial<Record<Exclude<Language, 'pt'>, FoodNames>> = {};
+
+export function registerFoodNames(language: Exclude<Language, 'pt'>, names: FoodNames): void {
+  FOOD_NAMES[language] = names;
+}
 
 export type { FoodNames } from './types';

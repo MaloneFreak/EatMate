@@ -1,6 +1,7 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { db } from './db';
-import { readMirror } from './mirror';
+import { compactMirror, readMirror, writeMirror, type Mirror } from './mirror';
+import type { Meal } from '../domain/types';
 import {
   clearAllData,
   deleteMeal,
@@ -78,5 +79,45 @@ describe('cópia de segurança local', () => {
     expect(Object.keys(readMirror().meals)).toHaveLength(0);
     await syncWithMirror();
     expect(await db.meals.count()).toBe(0);
+  });
+});
+
+describe('cópia de segurança local sem espaço', () => {
+  const now = Date.parse('2026-10-20T12:00:00');
+  const meal = (id: string, date: string, updatedAt: number): Meal => ({
+    id,
+    date,
+    type: 'almoco',
+    items: [{ id: `${id}-1`, name: 'Arroz' }],
+    createdAt: updatedAt,
+    updatedAt,
+  });
+
+  it('mantém só o recente quando a cópia não cabe no localStorage', () => {
+    const old = now - 200 * 24 * 60 * 60 * 1000;
+    const mirror: Mirror = {
+      version: 1,
+      meals: {
+        antiga: meal('antiga', '2026-03-01', old),
+        editada: meal('editada', '2026-03-02', now),
+        recente: meal('recente', '2026-10-19', now),
+      },
+      deletedMeals: { velha: old, nova: now },
+      customFoods: {},
+      deletedFoods: {},
+    };
+    const setItem = Storage.prototype.setItem;
+    vi.spyOn(Storage.prototype, 'setItem').mockImplementation(function (this: Storage, key, value) {
+      if (value.includes('"antiga"')) throw new DOMException('cheio', 'QuotaExceededError');
+      setItem.call(this, key, value);
+    });
+    vi.spyOn(Date, 'now').mockReturnValue(now);
+
+    writeMirror(mirror);
+
+    const saved = readMirror();
+    expect(Object.keys(saved.meals).sort()).toEqual(['editada', 'recente']);
+    expect(Object.keys(saved.deletedMeals)).toEqual(['nova']);
+    expect(compactMirror(mirror, now).meals.recente).toBeDefined();
   });
 });

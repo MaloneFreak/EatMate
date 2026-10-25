@@ -1,3 +1,4 @@
+import { todayISO } from '../domain/dates';
 import type { AppSettings, CustomFood, Meal, Profile } from '../domain/types';
 
 /*
@@ -59,11 +60,42 @@ export function readMirror(): Mirror {
   }
 }
 
-export function writeMirror(mirror: Mirror): void {
+/** Por quantos dias a cópia guarda as refeições quando o localStorage (≈ 5 MB) enche. */
+export const MIRROR_RECENT_DAYS = 60;
+const DAY_MS = 24 * 60 * 60 * 1000;
+
+/**
+ * Versão enxuta da cópia, para quando ela não cabe mais no localStorage: fica só o
+ * que foi registrado ou mexido nos últimos dias, que é o que ainda pode não ter
+ * chegado ao banco. As refeições antigas continuam no banco e no backup em arquivo.
+ */
+export function compactMirror(mirror: Mirror, now = Date.now()): Mirror {
+  const since = now - MIRROR_RECENT_DAYS * DAY_MS;
+  const sinceDate = todayISO(new Date(since));
+  const recent = <T>(map: Record<string, T>, keep: (value: T) => boolean) =>
+    Object.fromEntries(Object.entries(map).filter(([, value]) => keep(value)));
+  return {
+    ...mirror,
+    meals: recent(mirror.meals, (m) => m.updatedAt >= since || m.date >= sinceDate),
+    deletedMeals: recent(mirror.deletedMeals, (at) => at >= since),
+    deletedFoods: recent(mirror.deletedFoods, (at) => at >= since),
+  };
+}
+
+function save(mirror: Mirror): unknown {
   try {
     localStorage.setItem(KEY, JSON.stringify(mirror));
+    return undefined;
   } catch (error) {
-    // Sem espaço ou sem localStorage: o banco principal continua valendo.
+    return error ?? new Error('localStorage');
+  }
+}
+
+export function writeMirror(mirror: Mirror): void {
+  // Sem espaço: tenta de novo só com o mais recente, em vez de parar de proteger tudo.
+  const error = save(mirror) && save(compactMirror(mirror));
+  if (error) {
+    // Sem localStorage: o banco principal continua valendo.
     console.warn('Não foi possível atualizar a cópia de segurança local', error);
   }
 }
