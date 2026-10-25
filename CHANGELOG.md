@@ -2,7 +2,7 @@
 
 Todas as mudanças importantes do EatMate ficam registradas aqui. As versões seguem o [versionamento semântico](https://semver.org/lang/pt-BR/).
 
-## [Não lançado]
+## [1.1.0] - 2026-10-25
 
 ### Melhorias
 
@@ -52,6 +52,7 @@ Primeira versão do EatMate. 🎉
 - **Privacidade:** sem cadastro e sem servidor — os dados ficam só no seu aparelho. Backup e restauração para trocar de celular.
 - Tema claro e escuro, alimentos personalizados e um relatório de exemplo para ver como tudo funciona antes dos 7 dias.
 
+[1.1.0]: https://github.com/MaloneFreak/EatMate/releases/tag/v1.1.0
 [1.0.2]: https://github.com/MaloneFreak/EatMate/releases/tag/v1.0.2
 [1.0.1]: https://github.com/MaloneFreak/EatMate/releases/tag/v1.0.1
 [1.0.0]: https://github.com/MaloneFreak/EatMate/releases/tag/v1.0.0
