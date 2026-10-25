@@ -10,6 +10,14 @@ updates:
       dependencias:
         patterns: ['*']
         update-types: [minor, patch]
+    ignore:
+      # Os tipos do Node acompanham a versão do Node usada no projeto (.nvmrc).
+      - dependency-name: '@types/node'
+        update-types: [version-update:semver-major]
+      # Versões novas (maiores) do TypeScript esperam o typescript-eslint suportar;
+      # essa atualização é feita à mão.
+      - dependency-name: typescript
+        update-types: [version-update:semver-major]
   - package-ecosystem: github-actions
     directory: /
     schedule:
