@@ -33,7 +33,7 @@ EatMate parle **portugais, anglais, espagnol, allemand, français et italien**. 
 
 ## 🔒 Vos données restent les vôtres
 
-Pas d’inscription, pas de serveur, ni publicité ni traceur. Tout reste **uniquement sur votre appareil**. Nouveau téléphone ? **Profil → Exporter une sauvegarde**, puis **Restaurer une sauvegarde** sur le nouvel appareil.
+Pas d’inscription, pas de serveur, ni publicité ni traceur. Tout reste **uniquement sur votre appareil**. Gardez une copie dans le cloud avec **Profil → Enregistrer dans Drive ou iCloud** ; l’accueil vous le rappelle chaque semaine (ou chaque jour, ou jamais : c’est vous qui choisissez). Nouveau téléphone ? Touchez **Restaurer une sauvegarde** sur le nouvel appareil et choisissez le fichier.
 
 > ⚠️ Les notes sont des estimations pour vous aider à repérer des tendances. EatMate ne remplace pas l’avis d’un·e diététicien·ne.
 

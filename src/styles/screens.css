@@ -260,6 +260,23 @@
   color: var(--accent);
 }
 
+.backup-card {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  border-color: var(--primary);
+}
+
+.backup-icon {
+  color: var(--primary);
+}
+
+.backup-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
 /* ============================================================
    Registrar refeição
    ============================================================ */

@@ -46,7 +46,8 @@ EatMate speaks **Portuguese, English, Spanish, German, French and Italian**. It 
 - No sign-up, no server, no ads, no trackers.
 - Everything you log is **stored only on your device**.
 - A report only leaves your device when **you** copy, share or save it.
-- Switching phones? In **Profile → Export backup** you save a file; on the new phone, tap **Restore a backup** on the welcome screen (or **Profile → Import backup**).
+- **Keep a copy in the cloud:** **Profile → Save to Drive or iCloud** saves a backup of your entries to your Google Drive or iCloud (or anywhere else your phone can save files). The home screen reminds you every week when there are new entries without a backup — you can switch it to every day or turn it off in **Profile**.
+- Switching phones? On the new phone, tap **Restore a backup** on the welcome screen (or **Profile → Import backup**) and pick the backup file.
 
 ## 🌡️ How the grade is calculated
 
@@ -76,7 +77,7 @@ Each food has a grade from **A** (best) to **E**, inspired by the [Nutri-Score](
 
 **On iPhone, my entries disappeared after I added the app to my home screen.** iPhone keeps the data of Safari and the data of the home-screen app separate. Always use the same one (preferably the home-screen app). To move your entries from one to the other, use **Profile → Export backup** in one and **Import backup** in the other.
 
-**I deleted the app / cleared my browser. Did I lose everything?** The data lives in your device's browser, so clearing the browser's data deletes your entries. That's why it's worth exporting a backup now and then (the app shows the date of the last one).
+**I deleted the app / cleared my browser. Did I lose everything?** The data lives in your device's browser, so clearing the browser's data deletes your entries. That's why it's worth keeping a backup in Google Drive or iCloud — the app reminds you when it's time.
 
 **How do I find out about a new version?** The app tells you by itself: "New version available" appears with an **Update** button. What's new in each version is listed under [Releases](https://github.com/MaloneFreak/EatMate/releases) and in the [changelog](CHANGELOG.md) (in Portuguese).
 

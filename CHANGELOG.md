@@ -2,6 +2,17 @@
 
 Todas as mudanças importantes do EatMate ficam registradas aqui. As versões seguem o [versionamento semântico](https://semver.org/lang/pt-BR/).
 
+## [1.3.0] - 2026-10-29
+
+### Novidades
+
+- **Backup na nuvem:** em **Perfil → Salvar no Drive ou iCloud**, o backup vai pelo menu de compartilhar do celular para o Google Drive (Android) ou para o app Arquivos, no iCloud Drive ou no Google Drive (iPhone). Para recuperar, é só importar o arquivo.
+- **Lembrete de backup:** a tela inicial avisa quando há registros novos sem backup. O aviso é semanal, mas pode ser diário ou desligado em **Perfil → Lembrete de backup**, e "Agora não" adia o aviso.
+
+### Melhorias
+
+- Ao restaurar um backup, a data do último backup passa a ser a do arquivo. O app só volta a lembrar quando houver registros novos.
+
 ## [1.2.0] - 2026-10-29
 
 ### Novidades
@@ -65,6 +76,7 @@ Primeira versão do EatMate. 🎉
 - **Privacidade:** sem cadastro e sem servidor — os dados ficam só no seu aparelho. Backup e restauração para trocar de celular.
 - Tema claro e escuro, alimentos personalizados e um relatório de exemplo para ver como tudo funciona antes dos 7 dias.
 
+[1.3.0]: https://github.com/MaloneFreak/EatMate/releases/tag/v1.3.0
 [1.2.0]: https://github.com/MaloneFreak/EatMate/releases/tag/v1.2.0
 [1.1.0]: https://github.com/MaloneFreak/EatMate/releases/tag/v1.1.0
 [1.0.2]: https://github.com/MaloneFreak/EatMate/releases/tag/v1.0.2

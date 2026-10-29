@@ -1,4 +1,4 @@
-import { Download, Pencil, Smartphone, Trash2, Upload } from 'lucide-react';
+import { CloudUpload, Download, Pencil, Smartphone, Trash2, Upload } from 'lucide-react';
 import { useRef, useState, type ChangeEvent, type FormEvent } from 'react';
 import { useNavigate } from 'react-router';
 import { ClassifySheet } from '../components/ClassifySheet';
@@ -8,23 +8,24 @@ import { LanguagePicker } from '../components/LanguagePicker';
 import { PageHeader } from '../components/PageHeader';
 import { Rich } from '../components/Rich';
 import { useToast } from '../components/Toast';
-import {
-  BackupError,
-  backupFileName,
-  exportBackup,
-  importBackup,
-  markBackupDone,
-  readBackupFile,
-} from '../data/backup';
+import { BackupError, importBackup, readBackupFile } from '../data/backup';
 import { useData } from '../data/DataProvider';
-import { classifyFood, clearAllData, deleteCustomFood, saveProfileName } from '../data/repo';
+import {
+  classifyFood,
+  clearAllData,
+  deleteCustomFood,
+  saveProfileName,
+  updateSettings,
+} from '../data/repo';
+import { BACKUP_REMINDERS, DEFAULT_BACKUP_REMINDER } from '../domain/backupReminder';
 import { GRADE_THRESHOLDS } from '../domain/grades';
 import type { ClassifyOption } from '../domain/groups';
 import { SCORE_WEIGHTS } from '../domain/scoring';
-import type { CustomFood, ScoreComponentKey } from '../domain/types';
+import type { BackupReminder, CustomFood, ScoreComponentKey } from '../domain/types';
 import { useI18n } from '../i18n/I18nProvider';
 import { isIOS, isStandalone, useInstallPrompt } from '../lib/install';
-import { downloadText } from '../lib/share';
+import { saveBackup } from '../lib/saveBackup';
+import { canShareFiles } from '../lib/share';
 import { getThemePreference, setThemePreference, type ThemePreference } from '../lib/theme';
 
 const THEMES: ThemePreference[] = ['system', 'light', 'dark'];
@@ -39,6 +40,7 @@ export function ProfileScreen() {
   const [name, setName] = useState(profile?.name ?? '');
   const [theme, setTheme] = useState<ThemePreference>(getThemePreference);
   const [reclassify, setReclassify] = useState<CustomFood | null>(null);
+  const [shareFiles] = useState(canShareFiles);
   const fileRef = useRef<HTMLInputElement>(null);
   const { available: canInstall, install } = useInstallPrompt();
 
@@ -54,11 +56,15 @@ export function ProfileScreen() {
     setThemePreference(value);
   };
 
-  const doExport = async () => {
-    const backup = await exportBackup();
-    downloadText(backupFileName(), JSON.stringify(backup, null, 2), 'application/json');
-    await markBackupDone();
-    toast(p.exported);
+  const reminder = settings?.backupReminder ?? DEFAULT_BACKUP_REMINDER;
+
+  const doSave = async (via: 'share' | 'download') => {
+    const saved = await saveBackup({ profile, settings, meals, customFoods, reports }, via);
+    if (saved) toast(via === 'share' ? p.shared : p.exported);
+  };
+
+  const chooseReminder = (value: BackupReminder) => {
+    void updateSettings({ backupReminder: value });
   };
 
   const doImport = async (event: ChangeEvent<HTMLInputElement>) => {
@@ -188,7 +194,25 @@ export function ProfileScreen() {
           {p.lastBackup}{' '}
           <strong>{settings?.lastBackupAt ? f.dateTime(settings.lastBackupAt) : p.never}</strong>
         </p>
-        <button type="button" className="btn btn-secondary btn-block" onClick={doExport}>
+        {shareFiles && (
+          <>
+            <button
+              type="button"
+              className="btn btn-primary btn-block"
+              onClick={() => void doSave('share')}
+            >
+              <CloudUpload size={18} aria-hidden="true" /> {p.saveCloud}
+            </button>
+            <p className="muted small">
+              <Rich text={p.saveCloudHint} />
+            </p>
+          </>
+        )}
+        <button
+          type="button"
+          className="btn btn-secondary btn-block"
+          onClick={() => void doSave('download')}
+        >
           <Download size={18} aria-hidden="true" /> {p.export}
         </button>
         <button
@@ -201,12 +225,31 @@ export function ProfileScreen() {
         <input
           ref={fileRef}
           type="file"
-          accept="application/json,.json"
+          accept="application/json,.json,text/plain,.txt"
           className="visually-hidden"
           onChange={doImport}
           aria-label={t.common.backupFile}
           tabIndex={-1}
         />
+      </section>
+
+      <section className="card stack-sm" aria-labelledby="reminder-title">
+        <h2 id="reminder-title">{p.reminder}</h2>
+        <div className="chips" role="radiogroup" aria-labelledby="reminder-title">
+          {BACKUP_REMINDERS.map((value) => (
+            <button
+              key={value}
+              type="button"
+              role="radio"
+              aria-checked={reminder === value}
+              className={`chip${reminder === value ? ' selected' : ''}`}
+              onClick={() => chooseReminder(value)}
+            >
+              {p.reminderOptions[value]}
+            </button>
+          ))}
+        </div>
+        <p className="muted small">{p.reminderHint}</p>
       </section>
 
       {customFoods.length > 0 && (

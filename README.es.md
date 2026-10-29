@@ -33,7 +33,7 @@ EatMate habla **portugués, inglés, español, alemán, francés e italiano**. S
 
 ## 🔒 Tus datos son tuyos
 
-Sin registro, sin servidor, sin anuncios ni rastreadores. Todo se guarda **solo en tu dispositivo**. ¿Cambias de teléfono? Usa **Perfil → Exportar copia de seguridad** y luego **Restaurar** en el teléfono nuevo.
+Sin registro, sin servidor, sin anuncios ni rastreadores. Todo se guarda **solo en tu dispositivo**. Guarda una copia en la nube con **Perfil → Guardar en Drive o iCloud**; el inicio te lo recuerda cada semana (o cada día, o nunca: tú eliges). ¿Cambias de teléfono? Toca **Restaurar** en el teléfono nuevo y elige el archivo.
 
 > ⚠️ Las notas son estimaciones para ayudarte a ver patrones. EatMate no sustituye el consejo de un/a nutricionista.
 
