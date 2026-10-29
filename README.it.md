@@ -33,7 +33,7 @@ EatMate parla **portoghese, inglese, spagnolo, tedesco, francese e italiano**. S
 
 ## 🔒 I tuoi dati restano tuoi
 
-Nessuna registrazione, nessun server, niente pubblicità né tracciamento. Tutto resta **solo sul tuo dispositivo**. Cambi telefono? Usa **Profilo → Esporta backup** e poi **Ripristina un backup** sul nuovo telefono.
+Nessuna registrazione, nessun server, niente pubblicità né tracciamento. Tutto resta **solo sul tuo dispositivo**. Tieni una copia nel cloud con **Profilo → Salva su Drive o iCloud**; la schermata iniziale te lo ricorda ogni settimana (o ogni giorno, o mai: scegli tu). Cambi telefono? Tocca **Ripristina un backup** sul nuovo telefono e scegli il file.
 
 > ⚠️ I voti sono stime per aiutarti a notare le abitudini. EatMate non sostituisce il parere di un nutrizionista.
 

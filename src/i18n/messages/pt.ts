@@ -300,6 +300,14 @@ export const pt = {
     registeredDays: 'dias registrados',
     meals7: 'refeições em 7 dias',
     tip: 'Dica do dia',
+    backupTitle: 'Hora de fazer backup',
+    backupNever:
+      'Você ainda não fez nenhum backup. Salve uma cópia dos seus registros no Google Drive, no iCloud ou onde preferir.',
+    backupSince: (n: number) =>
+      `Seu último backup foi ${n === 1 ? 'ontem' : `há ${n} dias`}. Salve uma cópia dos registros novos no Google Drive, no iCloud ou onde preferir.`,
+    backupSave: 'Fazer backup',
+    backupLater: 'Agora não',
+    backupSettings: 'Dá para mudar ou desligar este lembrete em **Perfil**.',
   },
 
   foodInput: {
@@ -533,6 +541,14 @@ export const pt = {
     export: 'Exportar backup',
     import: 'Importar backup',
     exported: 'Backup salvo nos seus arquivos.',
+    saveCloud: 'Salvar no Drive ou iCloud',
+    saveCloudHint:
+      'No menu que abrir, escolha **Drive** (Android) ou **Salvar em Arquivos** e depois Google Drive ou iCloud Drive (iPhone). Para recuperar, toque em **Importar backup** e escolha o arquivo.',
+    shared: 'Backup salvo.',
+    reminder: 'Lembrete de backup',
+    reminderOptions: { off: 'Desligado', daily: 'Todo dia', weekly: 'Toda semana' },
+    reminderHint:
+      'O lembrete aparece na tela inicial quando há registros novos que ainda não estão em nenhum backup.',
     importTitle: 'Importar backup?',
     importMessage: (meals: number, reports: number) =>
       `O arquivo tem ${meals} refeições e ${reports} relatórios. Eles serão juntados aos seus dados atuais — nada será apagado.`,

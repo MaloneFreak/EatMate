@@ -307,6 +307,14 @@ export const es: Messages = {
     registeredDays: 'días registrados',
     meals7: 'comidas en 7 días',
     tip: 'Consejo del día',
+    backupTitle: 'Hora de hacer una copia de seguridad',
+    backupNever:
+      'Todavía no has hecho ninguna copia de seguridad. Guarda una copia de tus registros en Google Drive, en iCloud o donde prefieras.',
+    backupSince: (n: number) =>
+      `Tu última copia de seguridad fue ${n === 1 ? 'ayer' : `hace ${n} días`}. Guarda una copia de los registros nuevos en Google Drive, en iCloud o donde prefieras.`,
+    backupSave: 'Hacer copia',
+    backupLater: 'Ahora no',
+    backupSettings: 'Puedes cambiar o desactivar este recordatorio en **Perfil**.',
   },
 
   foodInput: {
@@ -541,6 +549,14 @@ export const es: Messages = {
     export: 'Exportar copia de seguridad',
     import: 'Importar copia de seguridad',
     exported: 'Copia de seguridad guardada en tus archivos.',
+    saveCloud: 'Guardar en Drive o iCloud',
+    saveCloudHint:
+      'En el menú que se abre, elige **Drive** (Android) o **Guardar en Archivos** y luego Google Drive o iCloud Drive (iPhone). Para recuperarla, toca **Importar copia de seguridad** y elige el archivo.',
+    shared: 'Copia de seguridad guardada.',
+    reminder: 'Recordatorio de copia de seguridad',
+    reminderOptions: { off: 'Desactivado', daily: 'Cada día', weekly: 'Cada semana' },
+    reminderHint:
+      'El recordatorio aparece en la pantalla de inicio cuando hay registros nuevos que aún no están en ninguna copia de seguridad.',
     importTitle: '¿Importar copia de seguridad?',
     importMessage: (m: number, r: number) =>
       `El archivo tiene ${meals(m)} y ${reports(r)}. Se combinarán con tus datos actuales: no se borrará nada.`,

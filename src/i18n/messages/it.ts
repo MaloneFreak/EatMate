@@ -302,6 +302,14 @@ export const it: Messages = {
     registeredDays: 'giorni registrati',
     meals7: 'pasti in 7 giorni',
     tip: 'Consiglio del giorno',
+    backupTitle: 'È ora di fare un backup',
+    backupNever:
+      'Non hai ancora fatto nessun backup. Salva una copia delle tue registrazioni su Google Drive, iCloud o dove preferisci.',
+    backupSince: (n: number) =>
+      `Il tuo ultimo backup è di ${n === 1 ? 'ieri' : `${n} giorni fa`}. Salva una copia delle nuove registrazioni su Google Drive, iCloud o dove preferisci.`,
+    backupSave: 'Fai il backup',
+    backupLater: 'Non ora',
+    backupSettings: 'Puoi cambiare o disattivare il promemoria in **Profilo**.',
   },
 
   foodInput: {
@@ -539,6 +547,14 @@ export const it: Messages = {
     export: 'Esporta backup',
     import: 'Importa backup',
     exported: 'Backup salvato nei tuoi file.',
+    saveCloud: 'Salva su Drive o iCloud',
+    saveCloudHint:
+      'Nel menu che si apre, scegli **Drive** (Android) oppure **Salva su File** e poi Google Drive o iCloud Drive (iPhone). Per ripristinarlo, tocca **Importa backup** e scegli il file.',
+    shared: 'Backup salvato.',
+    reminder: 'Promemoria backup',
+    reminderOptions: { off: 'Disattivato', daily: 'Ogni giorno', weekly: 'Ogni settimana' },
+    reminderHint:
+      'Il promemoria compare nella schermata iniziale quando ci sono nuove registrazioni non ancora salvate in un backup.',
     importTitle: 'Importare il backup?',
     importMessage: (nMeals: number, nReports: number) =>
       `Il file contiene ${meals(nMeals)} e ${reports(nReports)}. Verranno uniti ai tuoi dati attuali: non verrà cancellato nulla.`,
