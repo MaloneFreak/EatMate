@@ -28,7 +28,7 @@ npm run dev        # abre em http://localhost:5173
 src/
 ├── domain/            regras do app, sem interface (fáceis de testar)
 │   ├── foods.ts           base de alimentos (nota A–E, NOVA, grupo, apelidos em português)
-│   ├── foodNames/         nomes e apelidos dos alimentos em en, es, de, fr e it
+│   ├── foodNames/         nomes e apelidos dos alimentos em en, es, de, fr e it, e os nomes internacionais
 │   ├── lang/              regras de cada idioma para entender o texto (plural, números, unidades…)
 │   ├── parser.ts          entende o texto digitado ("2 fatias de pão…", "a cup of coffee…")
 │   ├── scoring.ts         nota de 0 a 100 e letra A–E
@@ -51,6 +51,7 @@ e2e/                   testes de ponta a ponta (Playwright), em português e em 
 
 - **Textos da interface:** `src/i18n/messages/pt.ts` define todos os textos. Cada idioma (`en.ts`, `es.ts`…) tem exatamente a mesma estrutura — o TypeScript avisa se faltar algum texto. Para incluir um idioma novo, crie o arquivo de mensagens, as regras em `src/domain/lang/`, a tabela de alimentos em `src/domain/foodNames/` e adicione o código em `src/domain/language.ts` e `src/i18n/languages.ts`.
 - **Alimentos:** a nota, o grupo e o grau de processamento ficam em `foods.ts` (um só lugar). Cada idioma só traduz os nomes (`foodNames/<idioma>.ts`: `id → [nome, apelidos…]`). Os testes conferem se todos os alimentos foram traduzidos e se nenhum nome aparece em dois alimentos diferentes.
+- **Nomes internacionais:** `foodNames/international.ts` guarda os nomes escritos do mesmo jeito em vários idiomas ("burrata", "quark", "ramen", "tiramisu", marcas…). Eles valem em todos os idiomas, depois da tabela do idioma: se a palavra já tem outro sentido ali ("latte" é leite em italiano; "feta" é fatia na Argentina), vale o do idioma. Nomes comuns em algum idioma ("pasta", "toast", "empanada"…) ficam só nas tabelas de cada idioma.
 - **Relatórios salvos** guardam números e chaves, não frases. Por isso, trocar o idioma muda também os relatórios antigos. Relatórios da versão 1 (que guardavam o texto em português) são gerados novamente no formato novo ao abrir o app ou ao importar um backup.
 
 ## Onde os dados ficam
@@ -61,7 +62,7 @@ e2e/                   testes de ponta a ponta (Playwright), em português e em 
 
 ## Como a nota é calculada
 
-A base tem **280 alimentos** reconhecidos por mais de **1.100 nomes e apelidos** em português (e tabelas equivalentes nos outros idiomas). Cada alimento tem:
+A base tem **296 alimentos** reconhecidos por mais de **2.200 nomes e apelidos** em português (e tabelas equivalentes nos outros idiomas). Cada alimento tem:
 
 - uma **nota de A a E**, estimada a partir da lógica do [Nutri-Score](https://www.santepubliquefrance.fr/en/nutri-score) (açúcar, gordura saturada, sal e calorias pesam contra; fibras, proteínas, frutas, verduras e leguminosas pesam a favor);
 - o **grau de processamento** da classificação NOVA, usada no [Guia Alimentar para a População Brasileira](https://www.gov.br/saude/pt-br/assuntos/saude-brasil/publicacoes-para-promocao-a-saude/guia_alimentar_populacao_brasileira_2ed.pdf).
