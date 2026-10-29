@@ -1,9 +1,11 @@
 import { describe, expect, it } from 'vitest';
+import { getDefaultFoodIndex } from '../foodIndex';
 import { BUILTIN_FOODS, localizedFoods } from '../foods';
 import { LANGUAGE_RULES } from '../lang';
 import { LANGUAGES } from '../language';
 import { foodKey } from '../text';
 import { FOOD_NAMES } from '.';
+import { INTERNATIONAL_NAMES } from './international';
 
 describe.each(LANGUAGES)('base de alimentos (%s)', (language) => {
   const rules = LANGUAGE_RULES[language];
@@ -47,5 +49,27 @@ describe.each(LANGUAGES)('base de alimentos (%s)', (language) => {
         .map((text) => `${food.id}: "${text}"`),
     );
     expect(clashes).toEqual([]);
+  });
+});
+
+describe('nomes internacionais', () => {
+  it('só usam alimentos que existem', () => {
+    const ids = new Set(BUILTIN_FOODS.map((f) => f.id));
+    expect(Object.keys(INTERNATIONAL_NAMES).filter((id) => !ids.has(id))).toEqual([]);
+  });
+
+  it.each(LANGUAGES)('valem em %s', (language) => {
+    const index = getDefaultFoodIndex(language);
+    expect(index.lookup('burrata')?.food.group).toBe('leite_derivados');
+    expect(index.lookup('quark')?.food.id).toBe('ricota');
+    expect(index.lookup('tiramisu')?.food.id).toBe('torta_doce');
+    expect(index.lookup('halloumi')?.food.id).toBe('queijo');
+  });
+
+  it('não mudam o sentido que a palavra já tem no idioma', () => {
+    expect(getDefaultFoodIndex('it').lookup('latte')?.food.id).toBe('leite');
+    expect(getDefaultFoodIndex('en').lookup('cookie')?.food.id).toBe('biscoito_doce');
+    // Na Argentina, "feta" é uma fatia ("una feta de jamón"): continua sendo unidade.
+    expect(getDefaultFoodIndex('es').lookup('feta')).toBeUndefined();
   });
 });

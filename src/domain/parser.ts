@@ -274,6 +274,21 @@ function parseSegment(segment: string, index: FoodIndex, c: Compiled): ParsedIte
         quantity = last.item.quantity ?? quantity;
       }
 
+      if (
+        !prefix &&
+        !quantity &&
+        last &&
+        last.end === i &&
+        last.item.foodId === food.id &&
+        items[items.length - 1] === last.item
+      ) {
+        // Dois nomes do mesmo alimento em seguida são um item só: "queijo brie", "arroz basmati".
+        last.item.name += ` ${lowerFirst(name)}`;
+        last.end = next;
+        i = next;
+        continue;
+      }
+
       const item: ParsedItem = { name, foodId: food.id, ...(quantity ? { quantity } : {}) };
       pendingQuantity = undefined;
       items.push(item);

@@ -25,6 +25,27 @@ describe('parseFoodText', () => {
     expect(names('romeu e julieta')).toEqual(['Romeu e julieta']);
   });
 
+  it('junta dois nomes seguidos do mesmo alimento num item só', () => {
+    expect(parse('queijo brie')).toEqual([
+      { name: 'Queijo brie', foodId: 'queijo', quantity: undefined },
+    ]);
+    expect(names('arroz basmati com cordeiro')).toEqual(['Arroz basmati', 'Cordeiro']);
+    expect(names('queijo, brie')).toEqual(['Queijo', 'Brie']);
+  });
+
+  it('reconhece nomes usados em vários idiomas', () => {
+    expect(parse('200g de burrata com tomate')).toEqual([
+      { name: 'Burrata', foodId: 'queijo', quantity: '200 g' },
+      { name: 'Tomate', foodId: 'tomate', quantity: undefined },
+    ]);
+    expect(parse('quark com morango')[0]?.foodId).toBe('ricota');
+    expect(parse('falafel com homus e tabule').map((i) => i.foodId)).toEqual([
+      'falafel',
+      'homus',
+      'salada',
+    ]);
+  });
+
   it('ignora acentos, maiúsculas e plural', () => {
     expect(parse('PAES')[0]?.foodId).toBe('pao_frances');
     expect(parse('ovos mexidos')[0]?.foodId).toBe('ovo_mexido');
