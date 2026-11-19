@@ -2,7 +2,7 @@
 
 Todas as mudanças importantes do EatMate ficam registradas aqui. As versões seguem o [versionamento semântico](https://semver.org/lang/pt-BR/).
 
-## [1.3.0] - 2026-10-29
+## [1.3.0] - 2026-11-19
 
 ### Novidades
 
