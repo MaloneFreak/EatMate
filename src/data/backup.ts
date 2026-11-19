@@ -55,6 +55,34 @@ export interface ImportSummary {
   reports: number;
 }
 
+/** O que vai num backup (os dados que o app já tem carregados servem). */
+export interface BackupData {
+  profile?: Profile | null;
+  settings?: AppSettings;
+  meals: Meal[];
+  customFoods: CustomFood[];
+  reports: SavedReport[];
+}
+
+export function buildBackup({
+  profile,
+  settings,
+  meals,
+  customFoods,
+  reports,
+}: BackupData): BackupFile {
+  return {
+    app: 'eatmate',
+    version: 1,
+    exportedAt: new Date().toISOString(),
+    ...(profile ? { profile } : {}),
+    ...(settings ? { settings } : {}),
+    meals,
+    customFoods,
+    reports,
+  };
+}
+
 export async function exportBackup(): Promise<BackupFile> {
   const [profile, settings, meals, customFoods, reports] = await Promise.all([
     getProfile(),
@@ -63,16 +91,7 @@ export async function exportBackup(): Promise<BackupFile> {
     db.customFoods.toArray(),
     db.reports.toArray(),
   ]);
-  return {
-    app: 'eatmate',
-    version: 1,
-    exportedAt: new Date().toISOString(),
-    ...(profile ? { profile } : {}),
-    settings,
-    meals,
-    customFoods,
-    reports,
-  };
+  return buildBackup({ profile, settings, meals, customFoods, reports });
 }
 
 const isObject = (v: unknown): v is Record<string, unknown> =>
@@ -339,11 +358,16 @@ async function importIntoDb(backup: BackupFile): Promise<void> {
       await db.kv.put({ key: 'profile', value: backup.profile });
     }
     const current = await getSettings();
+    // Os registros do arquivo já estão num backup: só o que mudar depois dele conta como novo.
+    const exportedAt = Date.parse(backup.exportedAt);
     await updateSettings({
       weekAnchor: current.weekAnchor ?? backup.settings?.weekAnchor,
       dismissedPeriods: [
         ...new Set([...current.dismissedPeriods, ...(backup.settings?.dismissedPeriods ?? [])]),
       ],
+      ...(Number.isFinite(exportedAt) && exportedAt <= Date.now()
+        ? { lastBackupAt: Math.max(current.lastBackupAt ?? 0, exportedAt) }
+        : {}),
     });
   });
 }

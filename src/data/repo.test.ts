@@ -154,6 +154,8 @@ describe('backup', () => {
     expect(summary).toEqual({ meals: 8, customFoods: 1, reports: 1 });
     expect(await db.meals.count()).toBe(8);
     expect((await db.kv.get('profile'))?.value).toMatchObject({ name: 'Pedro' });
+    // Os registros do arquivo já estão num backup: o lembrete só conta o que vier depois.
+    expect((await getSettings()).lastBackupAt).toBe(Date.parse(backup.exportedAt));
 
     // Importar de novo não duplica.
     await importBackup(parseBackup(JSON.stringify(backup)));

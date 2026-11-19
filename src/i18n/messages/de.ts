@@ -321,6 +321,14 @@ export const de: Messages = {
     registeredDays: 'erfasste Tage',
     meals7: 'Mahlzeiten in 7 Tagen',
     tip: 'Tipp des Tages',
+    backupTitle: 'Zeit für ein Backup',
+    backupNever:
+      'Du hast noch kein Backup gemacht. Sichere deine Einträge in Google Drive, iCloud oder wo du möchtest.',
+    backupSince: (n: number) =>
+      `Dein letztes Backup war ${n === 1 ? 'gestern' : `vor ${n} Tagen`}. Sichere deine neuen Einträge in Google Drive, iCloud oder wo du möchtest.`,
+    backupSave: 'Jetzt sichern',
+    backupLater: 'Nicht jetzt',
+    backupSettings: 'Du kannst die Erinnerung unter **Profil** ändern oder ausschalten.',
   },
 
   foodInput: {
@@ -556,6 +564,14 @@ export const de: Messages = {
     export: 'Backup exportieren',
     import: 'Backup importieren',
     exported: 'Backup in deinen Dateien gespeichert.',
+    saveCloud: 'In Drive oder iCloud sichern',
+    saveCloudHint:
+      'Wähle im Menü **Drive** (Android) oder **In Dateien sichern** und dann Google Drive oder iCloud Drive (iPhone). Zum Wiederherstellen tippe auf **Backup importieren** und wähle die Datei.',
+    shared: 'Backup gespeichert.',
+    reminder: 'Backup-Erinnerung',
+    reminderOptions: { off: 'Aus', daily: 'Jeden Tag', weekly: 'Jede Woche' },
+    reminderHint:
+      'Die Erinnerung erscheint auf dem Startbildschirm, wenn es neue Einträge gibt, die noch in keinem Backup sind.',
     importTitle: 'Backup importieren?',
     importMessage: (mealCount: number, reportCount: number) =>
       `Die Datei enthält ${meals(mealCount)} und ${reports(reportCount)}. Sie werden mit deinen aktuellen Daten zusammengeführt – nichts wird gelöscht.`,

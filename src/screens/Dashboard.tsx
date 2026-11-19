@@ -1,15 +1,30 @@
-import { CalendarDays, Check, ChevronRight, Flame, Lightbulb, Plus, Utensils } from 'lucide-react';
+import {
+  CalendarDays,
+  Check,
+  ChevronRight,
+  CloudUpload,
+  Flame,
+  Lightbulb,
+  Plus,
+  Utensils,
+} from 'lucide-react';
 import { Link } from 'react-router';
 import { LockedThermometer } from '../components/LockedThermometer';
 import { MealIcon } from '../components/MealIcon';
 import { ScoreDelta } from '../components/ScoreDelta';
 import { ScoreScale } from '../components/ScoreScale';
 import { Thermometer } from '../components/Thermometer';
+import { Rich } from '../components/Rich';
+import { useToast } from '../components/Toast';
 import { useData } from '../data/DataProvider';
+import { updateSettings } from '../data/repo';
+import { daysSinceBackup, isBackupReminderDue } from '../domain/backupReminder';
 import { todayISO } from '../domain/dates';
 import { MEAL_TYPES } from '../domain/meals';
 import type { Meal } from '../domain/types';
 import { useI18n } from '../i18n/I18nProvider';
+import { saveBackup } from '../lib/saveBackup';
+import { canShareFiles } from '../lib/share';
 import { currentStreak, mealsInLastDays } from '../lib/stats';
 import { tipOfTheDay } from '../lib/tips';
 import { useCurrentReport } from '../lib/useCurrentReport';
@@ -42,6 +57,8 @@ export function DashboardScreen() {
       <ThermometerCard />
 
       <TodayCard today={today} meals={todayMeals} />
+
+      <BackupReminderCard />
 
       <div className="kpis">
         <div className="kpi">
@@ -158,6 +175,51 @@ function TodayCard({ today, meals }: { today: string; meals: Meal[] }) {
           );
         })}
       </ul>
+    </section>
+  );
+}
+
+/** Lembra de fazer backup quando há registros novos fora de qualquer backup (ver `isBackupReminderDue`). */
+function BackupReminderCard() {
+  const { profile, settings, meals, customFoods, reports } = useData();
+  const { t } = useI18n();
+  const toast = useToast();
+  const d = t.dashboard;
+  if (!settings) return null;
+  const due = isBackupReminderDue({
+    reminder: settings.backupReminder,
+    lastBackupAt: settings.lastBackupAt,
+    snoozedAt: settings.backupReminderSnoozedAt,
+    meals,
+  });
+  if (!due) return null;
+
+  const days = daysSinceBackup(settings.lastBackupAt);
+  const save = async () => {
+    const via = canShareFiles() ? 'share' : 'download';
+    const saved = await saveBackup({ profile, settings, meals, customFoods, reports }, via);
+    if (saved) toast(via === 'share' ? t.profile.shared : t.profile.exported);
+  };
+  const later = () => void updateSettings({ backupReminderSnoozedAt: Date.now() });
+
+  return (
+    <section className="card backup-card" aria-labelledby="backup-title">
+      <div className="row">
+        <CloudUpload size={20} className="backup-icon" aria-hidden="true" />
+        <h2 id="backup-title">{d.backupTitle}</h2>
+      </div>
+      <p>{days === undefined ? d.backupNever : d.backupSince(days)}</p>
+      <div className="backup-actions">
+        <button type="button" className="btn btn-primary" onClick={() => void save()}>
+          {d.backupSave}
+        </button>
+        <button type="button" className="btn btn-ghost" onClick={later}>
+          {d.backupLater}
+        </button>
+      </div>
+      <p className="muted small">
+        <Rich text={d.backupSettings} />
+      </p>
     </section>
   );
 }

@@ -62,3 +62,47 @@ export function slugify(text: string): string {
     .replace(/[^a-z0-9]+/g, '-')
     .replace(/^-|-$/g, '');
 }
+
+/**
+ * Arquivo que o menu de compartilhar aceita. O Chrome só compartilha alguns tipos
+ * (imagens, PDF, texto…) e recusa JSON: nesse caso o mesmo conteúdo vai como .txt.
+ */
+function shareableFile(filename: string, text: string, mime: string): File | undefined {
+  if (!canShare() || typeof navigator.canShare !== 'function') return undefined;
+  const asText = filename.replace(/\.[^.]+$/, '.txt');
+  const options: [string, string][] = [
+    [filename, mime],
+    [asText, 'text/plain'],
+  ];
+  for (const [name, type] of options) {
+    const file = new File([text], name, { type });
+    try {
+      if (navigator.canShare({ files: [file] })) return file;
+    } catch {
+      // tipo recusado: tenta o próximo
+    }
+  }
+  return undefined;
+}
+
+/** Se o aparelho consegue mandar arquivos pelo menu de compartilhar ("Salvar no Drive"…). */
+export const canShareFiles = () => !!shareableFile('eatmate.json', '{}', 'application/json');
+
+/**
+ * Abre o menu de compartilhar com um arquivo: no Android aparece "Salvar no Drive";
+ * no iPhone, "Salvar em Arquivos" (iCloud Drive, Google Drive…).
+ */
+export async function shareFile(
+  filename: string,
+  text: string,
+  mime: string,
+): Promise<'shared' | 'cancelled' | 'unsupported'> {
+  const file = shareableFile(filename, text, mime);
+  if (!file) return 'unsupported';
+  try {
+    await navigator.share({ files: [file] });
+    return 'shared';
+  } catch (error) {
+    return (error as DOMException)?.name === 'AbortError' ? 'cancelled' : 'unsupported';
+  }
+}

@@ -271,6 +271,14 @@ export const en: Messages = {
     registeredDays: 'days logged',
     meals7: 'meals in 7 days',
     tip: 'Tip of the day',
+    backupTitle: 'Time for a backup',
+    backupNever:
+      "You haven't made a backup yet. Save a copy of your entries to Google Drive, iCloud or wherever you like.",
+    backupSince: (n: number) =>
+      `Your last backup was ${n === 1 ? 'yesterday' : `${n} days ago`}. Save a copy of your new entries to Google Drive, iCloud or wherever you like.`,
+    backupSave: 'Back up now',
+    backupLater: 'Not now',
+    backupSettings: 'You can change or turn off this reminder in **Profile**.',
   },
 
   foodInput: {
@@ -501,6 +509,14 @@ export const en: Messages = {
     export: 'Export backup',
     import: 'Import backup',
     exported: 'Backup saved to your files.',
+    saveCloud: 'Save to Drive or iCloud',
+    saveCloudHint:
+      'In the menu that opens, choose **Drive** (Android) or **Save to Files**, then Google Drive or iCloud Drive (iPhone). To restore, tap **Import backup** and pick the file.',
+    shared: 'Backup saved.',
+    reminder: 'Backup reminder',
+    reminderOptions: { off: 'Off', daily: 'Every day', weekly: 'Every week' },
+    reminderHint:
+      "The reminder shows up on the home screen when you have new entries that aren't in a backup yet.",
     importTitle: 'Import backup?',
     importMessage: (meals, reports) =>
       `The file has ${meals} meals and ${reports} reports. They'll be merged with your current data — nothing will be deleted.`,

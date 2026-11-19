@@ -241,10 +241,17 @@ export interface SavedReport {
   data: ReportData;
 }
 
+/** Com que frequência a tela inicial lembra de fazer backup. */
+export type BackupReminder = 'off' | 'daily' | 'weekly';
+
 export interface AppSettings {
   /** Primeiro dia da "Semana 1" dos relatórios automáticos. */
   weekAnchor?: string;
   /** Períodos (início_fim) de relatórios semanais excluídos pelo usuário — não são recriados automaticamente. */
   dismissedPeriods: string[];
   lastBackupAt?: number;
+  /** Sem valor, vale o padrão (`DEFAULT_BACKUP_REMINDER`). */
+  backupReminder?: BackupReminder;
+  /** Quando a pessoa tocou em "Agora não" no lembrete de backup. */
+  backupReminderSnoozedAt?: number;
 }

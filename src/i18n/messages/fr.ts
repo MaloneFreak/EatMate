@@ -318,6 +318,14 @@ export const fr: Messages = {
     registeredDays: 'jours enregistrés',
     meals7: 'repas en 7 jours',
     tip: 'Conseil du jour',
+    backupTitle: 'C’est l’heure de la sauvegarde',
+    backupNever:
+      'Vous n’avez encore fait aucune sauvegarde. Enregistrez une copie de vos entrées dans Google Drive, iCloud ou ailleurs.',
+    backupSince: (n: number) =>
+      `Votre dernière sauvegarde date ${n === 1 ? 'd’hier' : `d’il y a ${n} jours`}. Enregistrez une copie de vos nouvelles entrées dans Google Drive, iCloud ou ailleurs.`,
+    backupSave: 'Sauvegarder',
+    backupLater: 'Plus tard',
+    backupSettings: 'Vous pouvez modifier ou désactiver ce rappel dans **Profil**.',
   },
 
   foodInput: {
@@ -554,6 +562,14 @@ export const fr: Messages = {
     export: 'Exporter une sauvegarde',
     import: 'Importer une sauvegarde',
     exported: 'Sauvegarde enregistrée dans vos fichiers.',
+    saveCloud: 'Enregistrer dans Drive ou iCloud',
+    saveCloudHint:
+      'Dans le menu qui s’ouvre, choisissez **Drive** (Android) ou **Enregistrer dans Fichiers**, puis Google Drive ou iCloud Drive (iPhone). Pour restaurer, touchez **Importer une sauvegarde** et choisissez le fichier.',
+    shared: 'Sauvegarde enregistrée.',
+    reminder: 'Rappel de sauvegarde',
+    reminderOptions: { off: 'Désactivé', daily: 'Chaque jour', weekly: 'Chaque semaine' },
+    reminderHint:
+      'Le rappel apparaît sur l’écran d’accueil quand vous avez de nouvelles entrées qui ne sont encore dans aucune sauvegarde.',
     importTitle: 'Importer la sauvegarde\u00a0?',
     importMessage: (meals: number, reports: number) =>
       `Le fichier contient ${meals} repas et ${reportCount(reports)}. Ils seront ajoutés à vos données actuelles — rien ne sera effacé.`,

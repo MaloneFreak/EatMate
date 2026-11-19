@@ -33,7 +33,7 @@ EatMate spricht **Portugiesisch, Englisch, Spanisch, Deutsch, Französisch und I
 
 ## 🔒 Deine Daten gehören dir
 
-Keine Anmeldung, kein Server, keine Werbung, keine Tracker. Alles bleibt **nur auf deinem Gerät**. Neues Handy? **Profil → Backup exportieren** und auf dem neuen Handy **Backup wiederherstellen**.
+Keine Anmeldung, kein Server, keine Werbung, keine Tracker. Alles bleibt **nur auf deinem Gerät**. Sichere eine Kopie in der Cloud mit **Profil → In Drive oder iCloud sichern**; der Startbildschirm erinnert dich jede Woche daran (oder jeden Tag oder nie – du entscheidest). Neues Handy? Dort **Backup wiederherstellen** tippen und die Datei wählen.
 
 > ⚠️ Die Noten sind Schätzungen, die dir helfen, Muster zu erkennen. EatMate ersetzt keine Ernährungsberatung.
 

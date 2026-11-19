@@ -97,7 +97,7 @@ export function OnboardingScreen() {
       <input
         ref={fileRef}
         type="file"
-        accept="application/json,.json"
+        accept="application/json,.json,text/plain,.txt"
         className="visually-hidden"
         onChange={restore}
         aria-label={t.common.backupFile}
